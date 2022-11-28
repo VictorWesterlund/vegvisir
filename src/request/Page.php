@@ -45,10 +45,15 @@
 
 		// Set or get locale cookie from reference list of hostnames
 		private static function get_locale(string $locale = null): string {
+			$locales = Path::contents(Path::root("pages"));
+
+			if (!empty($_COOKIE["user_locale"]) && in_array($_COOKIE["user_locale"], $locales)) {
+				return $_COOKIE["user_locale"];
+			}
+			
 			// Locale arg not provided, use the first locale in user content pages
 			// as default.
-			if (empty($locale) && empty($_COOKIE["user_locale"])) {
-				$locales = Path::contents(Path::root("pages"));
+			if (empty($locale)) {
 				if (empty($locales)) {
 					http_response_code(404);
 					die("No pages defined");
