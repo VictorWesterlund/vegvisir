@@ -186,7 +186,7 @@ To install Pragma locally you need the following prerequisites
 * PHP 8.1+ (preferably PHP-FPM)
 * [The composer package manager](https://getcomposer.org/)
 
-Assuming you have all that set up, here's how to get GeneMate up and running on Debian-based systems:
+Assuming you have all that set up, here's how to get Pragma up and running on Debian-based systems:
 
 
 1. **Clone the repo**
