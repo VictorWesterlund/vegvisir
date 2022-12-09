@@ -9,7 +9,7 @@
 
 		// Get root of user site folder
 		public static function root(string $crumbs = ""): string {
-			return $_ENV["SITE_PATH"] . "/" . $crumbs;
+			return $_ENV["site_path"] . "/" . $crumbs;
 		}
 
 		// Return the contents of a path
