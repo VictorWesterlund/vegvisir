@@ -1,18 +1,59 @@
 # Pragma
 
-Build websites the way you want. This framework is designed to interfere *as little as possible* with your code and let you decide how your website should look and behave. It does not enforce any rules on how you write your styles, which preprocessors you use or how to connect to databases. Pragma will *only* provide you with: request routing, page and asset loading, basic asset optimizations. 
+Build websites the way you want. This framework is designed to interfere *as little as possible* with how you write your code and let you decide how your website should look and behave. It covers the basics of an otherwise vanilla PHP, JavaScript, and CSS website - that don't rely on preprocessors (such as SASS or TypeScript) offered by the framework itself, *but those features can of course be implemented downstream*.
 
-## What's the point?
+## 🤷 What's the point?
 
-Frameworks today tend to enforce rules on how you should structure your files and code. This is of course useful, and those frameworks (like Laravel) should probaby be used in most cases. Pragma is intended for more "custom" websites that perhaps don't require all - or can't make efficient use of - the features larger frameworks provide.
+Frameworks today tend to encourage developers to follow certain rules when making new websites. *This is of course useful* and those frameworks should ***probaby*** be used instead. The goal of Pragma is to tackle *only* the following when the goal is to build a website *from sratch*:
+
+- Navigation (SPA-like)
+- Localization
+- Interaction
+- Bundling
+
+The rest is up to the developer to figure out.
 
 ![meme](https://user-images.githubusercontent.com/35688133/204326222-236a71be-5ea3-4653-8caa-6f6cfcd0d0d6.png)
 
-*Using a framework can sometimes feel a bit overkill*.
+This is what Pragma is trying to solve. Need to connect to a database, need to send automatic mails? Do it your way!
+
+# Examples
+
+Check out the [GeneMate<sup>®</sup> by iCellate](https://genemate.se) website, which spawned this project, if you wish to see Pragma used in production. And here are a few examples of how websites can be built with Pragma:
 
 ### The simplest website in Pragma
 
-No bells and whistles? Build static websites with ease.
+No bells and whistles? Build static websites with only one page.
+
+"/pages/{locale}/document.php" contains the following:
+```php
+<html>
+<head>
+  <!-- Will import and minify the CSS file at "/assets/css/pages/style.css" -->
+  <style><?= Page::css("pages/style") ?></style>
+</head>
+<body>
+  <h1>Hello world</h1>
+  <!-- Pragma will expose your "/assets" folder as static content -->
+  <img src="/assets/media/coolpic.webp" alt="A cool picture"/>
+  <!-- Using data-trigger will call the method with data-action -->
+  <button data-trigger="document" data-trigger="myCoolMethod">Click to say the magic word!</button>
+  <!-- Will import and minify the JS file at "/assets/js/pages/script.js" -->
+  <script><? Page::js("pages/script") ?></script>
+</body>
+</html>
+```
+
+"/assets/js/pages/document.js" contains the following:
+```js
+// "document" makes this block listen for data-trigger="document" elements, it's basically which scope.
+globalThis.pragma.Interaction("document", {
+  // And "myCoolMethod" here was defined by data-action="myCoolMethod".
+  myCoolMethod: (event) => {
+    alert("Please!");
+  }
+});
+```
 
 <details>
 <summary>🌲 Click to view directory tree</summary>
@@ -34,22 +75,6 @@ No bells and whistles? Build static websites with ease.
 ```
 </details>
 
-```php
-<html>
-<head>
-  <!-- Will import and minify the CSS file at "/assets/css/pages/style.css" -->
-  <style><?= Page::css("pages/style") ?></style>
-</head>
-<body>
-  <h1>Hello world</h1>
-  <!-- Pragma will expose your "/assets" folder as static content -->
-  <img src="/assets/media/coolpic.webp" alt="A cool picture"/>
-  <!-- Will import and minify the JS file at "/assets/js/pages/script.js" -->
-  <script><? Page::js("pages/script") ?></script>
-</body>
-</html>
-```
-
 ### A simple website in Pragma
 
 Let's say we want to build a simple two-page website. A langingpage and a contact page.
@@ -57,32 +82,6 @@ Let's say we want to build a simple two-page website. A langingpage and a contac
 Pragma uses SPA-style loading to inject the contents of a page into a target element.
 
 [**You can read more about page loading in Pragma here**](#todo)
-
-<details>
-<summary>🌲 Click to view directory tree</summary>
-
-```bash
-/
-├── assets
-│   ├── css
-│   │   ├── pages
-│   │   │   ├── main.css
-│   │   │   ├── contact.css
-│   │   └── document.css
-│   ├── js
-│   │   ├── pages
-│   │   │   ├── main.js
-│   │   │   ├── contact.js
-│   │   └── document.js
-│   └── media
-│       └── coolpic.webp
-└── pages
-   └── EN_EN
-       ├── document.php
-       ├── main.php
-       └── contact.php
-```
-</details>
 
 <details>
 <summary>📜 Click to view code</summary>
@@ -150,8 +149,37 @@ Pragma uses SPA-style loading to inject the contents of a page into a target ele
 <script><? Page::js("pages/contact") ?></script>
 ```
 </details>
+<details>
+<summary>🌲 Click to view directory tree</summary>
 
-## 📥 Installation
+```bash
+/
+├── assets
+│   ├── css
+│   │   ├── pages
+│   │   │   ├── main.css
+│   │   │   ├── contact.css
+│   │   └── document.css
+│   ├── js
+│   │   ├── pages
+│   │   │   ├── main.js
+│   │   │   ├── contact.js
+│   │   └── document.js
+│   └── media
+│       └── coolpic.webp
+└── pages
+   └── EN_EN
+       ├── document.php
+       ├── main.php
+       └── contact.php
+```
+</details>
+
+## A *sample* website in Pragma
+
+[This is a sample website built with Pragma](#todo)
+
+# 📥 Installation
 
 To install Pragma locally you need the following prerequisites
 * A webserver (preferably NGINX 1.18+)
@@ -171,18 +199,21 @@ $ git clone https://github.com/VictorWesterlund/pragma
 $ composer install --optimize-autoloader
 ```
 
-3. **Point server roots**
+3. **Point server root**
    
-   ragma does not come with an executable to spin up a dev server. So these instructions will apply for both live and local environments
+   > **Note** Pragma does not come with an executable to spin up a dev server. So these instructions will apply for both live and local environments
+   
+   Configure your webserver to route *all traffic* to your website to `{path-to-pragma-root}/public/index.php`. Pragma handles request routing automatically.
+   
+   <details>
+   <summary>Example with NGINX</summary>
    
    * Point the root of a virtual host on your webserver to the `/public` folder in this repo.
       - This location should redirect all URIs to the `/public/index.php` file. This in turn
         will spin up the internal request router which will handle API calls and everything.
         
-        *Example with NGINX:*
-        
         ```nginx
-        root /path/to/genemate/public;
+        root /path/to/pragma/public;
         
         location ~ /* {
            try_files /index.php =503;
@@ -207,14 +238,15 @@ $ composer install --optimize-autoloader
        ```
        
        This step is of course not required. Pragma will serve static assets automatically, but letting NGINX handle them directly is much faster.
+   </details>
        
 4. **Set site path**
 
-   Copy the file `.env.example.ini` to `.env.ini` and update the `SITE_PATH` variable with the absolute location to your website contents.
+   Copy the file `.env.example.ini` to `.env.ini` and update the `site_path` variable with the absolute location to your website contents.
    
    ```ini
    ; Example
-   SITE_PATH="/var/www/my_awesome_website"
+   site_path="/path/to/your/website/"
    ```
    
 Et voilà! Navigate to the host you defined in your webserver config.
