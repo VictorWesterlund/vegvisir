@@ -1,27 +1,22 @@
 # Pragma
 
-Build websites the way you want. This framework is designed to interfere *as little as possible* with how you write your code and let you decide how your website should look and behave. It covers the basics of an otherwise vanilla PHP, JavaScript, and CSS website - that don't rely on preprocessors (such as SASS or TypeScript) offered by the framework itself, *but those features can of course be implemented downstream*.
+Build websites the way you want. This framework is designed to interfere *as little as possible* with how you write your code and let you decide how your website should look, feel, and behave. This framework will take care of interactions, navigation, and asset imports; only.
 
 ## 🤷 What's the point?
 
-Frameworks today tend to encourage developers to follow certain rules when making new websites. *This is of course useful* and those frameworks should ***probaby*** be used instead. The goal of Pragma is to tackle *only* the following when the goal is to build a website *from sratch*:
-
-- Navigation (SPA-like)
-- Localization
-- Interaction
-- Bundling
-
-The rest is up to the developer to figure out.
+**TLDR;**
 
 ![meme](https://user-images.githubusercontent.com/35688133/204326222-236a71be-5ea3-4653-8caa-6f6cfcd0d0d6.png)
 
-This is what Pragma is trying to solve. Need to connect to a database, need to send automatic mails? Do it your way!
+Pragma is a foundation for a vanilla PHP website (with optional vanilla JS and CSS). It wont abstract away stuff like connecting to databases, sending emails, or call APIs.
 
-# Examples
+---
 
-Check out the [GeneMate<sup>®</sup> by iCellate](https://genemate.se) website, which spawned this project, if you wish to see Pragma used in production. And here are a few examples of how websites can be built with Pragma:
+Check out [GeneMate<sup>®</sup> by iCellate](https://genemate.se) if you wish to see Pragma used in production.
 
-### The simplest website in Pragma
+---
+
+## Example
 
 No bells and whistles? Build static websites with only one page.
 
@@ -38,8 +33,10 @@ No bells and whistles? Build static websites with only one page.
   <img src="/assets/media/coolpic.webp" alt="A cool picture"/>
   <!-- Using data-trigger will call the method with data-action -->
   <button data-trigger="document" data-trigger="myCoolMethod">Click to say the magic word!</button>
+  <!-- This will load in Pragma's interaction and navigation handlers -->
+  <script><?= Page::init() ?></script>
   <!-- Will import and minify the JS file at "/assets/js/pages/script.js" -->
-  <script><? Page::js("pages/script") ?></script>
+  <script><?= Page::js("pages/script") ?></script>
 </body>
 </html>
 ```
