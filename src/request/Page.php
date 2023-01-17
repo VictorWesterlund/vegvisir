@@ -76,8 +76,10 @@
 		// with the static reference Page::<method> anywhere on the page.
 
 		// Return minified CSS from file
-		public static function css(string $file): string {
-			$file = Page::get_asset_path("css", $file);
+		public static function css(string $file, bool $relative = true): string {
+			// Get assets/css relative from site path unless the relative flag is set.
+			// An unset relative flag will make the path absolute.
+			$file = $relative ? Page::get_asset_path("css", $file) : $file;
 
 			if(!is_file($file)) {
 				return "";
@@ -88,8 +90,10 @@
 		}
 
 		// Return minified JS from file
-		public static function js(string $file): string {
-			$file = Page::get_asset_path("js", $file);
+		public static function js(string $file, bool $relative = true): string {
+			// Get assets/js relative from site path unless the relative flag is set.
+			// An unset relative flag will make the path absolute.
+			$file = $relative ? Page::get_asset_path("js", $file) : $file;
 
 			if(!is_file($file)) {
 				return "";
@@ -101,8 +105,10 @@
 
 		// Return contents of media file as base64-encoded string unless whitelisted
 		// for assets that should be read as-is, such as SVG.
-		public static function media(string $file): string {
-			$file = file_get_contents(Page::get_asset_path("media", $file));
+		public static function media(string $file, bool $relative = true): string {
+			// Get assets/media relative from site path unless the relative flag is set.
+			// An unset relative flag will make the path absolute.
+			$file = $relative ? file_get_contents(Page::get_asset_path("media", $file)) : $file;
 
 			// Invalid file returns empty string
 			if ($file === false) {
@@ -119,7 +125,7 @@
 
 		// Load an external document into the current document
 		public static function include(string $name) {
-			// Rewrite root to /main page
+			// Rewrite empty path to "index" page
 			if ($name === "/") {
 				$name = "/index";
 			}
@@ -128,11 +134,10 @@
 			$locale = Page::get_locale();
 			$file = Path::root("pages/${locale}/${name}.php");
 
-			// If user content page does not exist, try to load from framework
-			if (!is_file($file)) {
-				$file = Path::pragma("src/frontend/${name}.php");
-			}
-
 			include $file;
+		}
+
+		public static function init() {
+			include Path::pragma("src/frontend/bundle.php");
 		}
 	}
