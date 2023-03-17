@@ -116,7 +116,7 @@
 			}
 
 			// Base64-encode everything that isn't in whitelist array
-			if (!in_array(substr($file, -1, 4), [".svg"])) {
+			if (!preg_match("//u", $file)) {
 				$file = base64_encode($file);
 			}
 			
