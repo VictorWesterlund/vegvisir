@@ -1,9 +1,15 @@
 <?php
 
 	use MatthiasMullie\Minify;
+	use FunctionFlags\FunctionFlags;
 
 	class Page {
 		public function __construct($page = "document") {
+			FunctionFlags::define([
+				"PATH_RELATIVE",
+				"MEDIA_BASE64"
+			]);
+
 			// Check if request is for partial content
 			if (array_key_exists("HTTP_X_NAVIGATION_TYPE", $_SERVER)) {
 				switch ($_SERVER["HTTP_X_NAVIGATION_TYPE"]) {
@@ -105,10 +111,11 @@
 
 		// Return contents of media file as base64-encoded string unless whitelisted
 		// for assets that should be read as-is, such as SVG.
-		public static function media(string $file, bool $relative = true): string {
+		public static function media(string $file, int $flags): string {
+			$test = FunctionFlags::isset(MEDIA_BASE64);
 			// Get assets/media relative from site path unless the relative flag is set.
 			// An unset relative flag will make the path absolute.
-			$file = $relative ? file_get_contents(Page::get_asset_path("media", $file)) : $file;
+			$file = $flags & TEST ? file_get_contents(Page::get_asset_path("media", $file)) : $file;
 
 			// Invalid file returns empty string
 			if ($file === false) {
