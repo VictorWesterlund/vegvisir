@@ -178,4 +178,4 @@ Pragma uses SPA-style loading to inject the contents of a page into a target ele
 
 # Installation
 
-Check out the INSTALL.md file for instructions.
+[Check out INSTALL.md for instructions](https://github.com/VictorWesterlund/pragma/blob/master/LICENSE)
