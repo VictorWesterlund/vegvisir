@@ -4,7 +4,7 @@
 	use FunctionFlags\FunctionFlags;
 
 	class Page {
-		public function __construct($page = "document") {
+		public function __construct(string $page = "document") {
 			FunctionFlags::define([
 				"PATH_RELATIVE",
 				"MEDIA_BASE64"
@@ -26,6 +26,11 @@
 				// Serve the whole document on (re)load
 				Page::include("document");
 			}
+		}
+
+		private static function error(int $code): never {
+			http_response_code($code);
+			exit();
 		}
 
 		// Return absolute path to asset on disk.
@@ -123,7 +128,7 @@
 			}
 
 			// Base64-encode everything that isn't in whitelist array
-			if (!in_array(substr($file, -1, 4), [".svg"])) {
+			if (!preg_match("//u", $file)) {
 				$file = base64_encode($file);
 			}
 			
@@ -140,6 +145,10 @@
 			// Attempt to load from user content pages
 			$locale = Page::get_locale();
 			$file = Path::root("pages/${locale}/${name}.php");
+
+			if (!is_file($file)) {
+				return Page::error(404);
+			}
 
 			include $file;
 		}

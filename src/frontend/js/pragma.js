@@ -9,6 +9,8 @@ globalThis.pragma = {
 	Navigation: (...args) => new Navigation(...args)
 };
 
+globalThis.pragma.Navigation(window.location.pathname.length > 1 ? window.location.pathname : "/index").navigate(document.querySelector("main"));
+
 // Handle browser back/forward buttons
 window.addEventListener("popstate", (event) => {
 	if ("url" in event.state) {

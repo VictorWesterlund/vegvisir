@@ -27,10 +27,6 @@ class Navigation {
 		// Create URL object from string
 		url = url instanceof URL ? url : new URL(url);
 
-		if (url.pathname.substring(0, 6) === "/error") {
-			return false;
-		}
-
 		if (url.pathname === "/index") {
 			url.pathname = "/";
 		}
@@ -40,11 +36,6 @@ class Navigation {
 		}
 
 		history.pushState(state, "", url);
-	}
-
-	// Replace inner DOM of target with an SVG spinner
-	waiting(target) {
-		this.setTargetHtml(target, globalThis.spinnerSvg);
 	}
 
 	// Scroll to anchor element in DOM
@@ -179,31 +170,53 @@ class Navigation {
 		}
 	}
 
+	// Emit a loading/loaded event on window and target
+	dispatchEvents(name, target = null) {
+		// Emit "loading" or "loaded" event depending on truthiness of loading variable
+		const event = new Event(name, {
+			detail: {
+				target: target,
+				page: this.url
+			}
+		});
+
+		// Always dispatch on document
+		document.dispatchEvent(event);
+
+		// Also dispatch directly on target if set
+		if (target instanceof HTMLElement) {
+			target.dispatchEvent(event);
+		}
+	}
+
 	// Perform SPA navigation by fetching new page and modifing DOM
 	async navigate(target = null, rejectOnFail = false) {
 		target = target ?? this.main;
+		this.dispatchEvents("pragmaloading", target);
 		
 		// Tell Worker to fetch page
 		const selector = this.getCssSelector(target);
 		this.worker.postMessage([selector, this.url.toString()]);
 
-		const respTimeout = setTimeout(() => this.waiting(target), 300);
+		const respTimeout = setTimeout(() => this.dispatchEvents("pragmawaiting", target), 300);
 
 		// Wait for Worker to fetch page
 		const nav = await new Promise((resolve) => {
 			this.worker.addEventListener("message", (event) => {
 				clearTimeout(respTimeout);
-				let [target, body, status, url] = event.data;
-				url = new URL(url);
+				let [targetSelector, body, status, url] = event.data;
+
+				// Update DOM and resolve this and outer Promise
+				this.setTargetHtml(targetSelector, body);
+				this.dispatchEvents("pragmaloaded", document.querySelector(targetSelector));
 
 				// Target is a valid top navigation, do some stuff
-				if (status === 200 && (target === "main")) {
+				if (target.tagName === this.main.tagName) {
 					// Add loaded URL to history
 					this.historyPush(url);
 				}
 
-				// Update DOM and resolve this and outer Promise
-				this.setTargetHtml(target, body);
+				
 				resolve(event.data);
 			}, { once: true });
 		});
