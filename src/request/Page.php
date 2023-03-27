@@ -6,8 +6,8 @@
 	class Page {
 		public function __construct(string $page = "document") {
 			FunctionFlags::define([
-				"PATH_RELATIVE",
-				"MEDIA_BASE64"
+				"PATH_ABSOLUTE",
+				"ENCODE_B64"
 			]);
 
 			// Check if request is for partial content
@@ -87,49 +87,44 @@
 		// with the static reference Page::<method> anywhere on the page.
 
 		// Return minified CSS from file
-		public static function css(string $file, bool $relative = true): string {
+		public static function css(string $path, int $flags = null): string {
 			// Get assets/css relative from site path unless the relative flag is set.
 			// An unset relative flag will make the path absolute.
-			$file = $relative ? Page::get_asset_path("css", $file) : $file;
+			$path = !FunctionFlags::isset(PATH_ABSOLUTE) ? Page::get_asset_path("css", $path) : $path;
 
-			if(!is_file($file)) {
-				return "";
-			}
-
-			$minifier = new Minify\CSS($file);
-			return $minifier->minify();
+			// Load and minify CSS if file found. Else return empty string
+			return is_file($path) ? (new Minify\CSS($path))->minify() : "";
 		}
 
 		// Return minified JS from file
-		public static function js(string $file, bool $relative = true): string {
+		public static function js(string $path, int $flags = null): string {
 			// Get assets/js relative from site path unless the relative flag is set.
 			// An unset relative flag will make the path absolute.
-			$file = $relative ? Page::get_asset_path("js", $file) : $file;
+			$path = !FunctionFlags::isset(PATH_ABSOLUTE) ? Page::get_asset_path("js", $path) : $path;
 
-			if(!is_file($file)) {
-				return "";
-			}
-
-			$minifier = new Minify\JS($file);
-			return $minifier->minify();
+			// Load and minify JS if file found. Else return empty string
+			return is_file($path) ? (new Minify\JS($path))->minify() : "";
 		}
 
 		// Return contents of media file as base64-encoded string unless whitelisted
 		// for assets that should be read as-is, such as SVG.
-		public static function media(string $file, int $flags): string {
-			$test = FunctionFlags::isset(MEDIA_BASE64);
-			// Get assets/media relative from site path unless the relative flag is set.
-			// An unset relative flag will make the path absolute.
-			$file = $flags & TEST ? file_get_contents(Page::get_asset_path("media", $file)) : $file;
+		public static function media(string $path, int $flags = null): string {
+			// Get assets/media relative from site path unless the absolute flag is set.
+			$path = !FunctionFlags::isset(PATH_ABSOLUTE) ? Page::get_asset_path("media", $path) : $path;
 
-			// Invalid file returns empty string
+			$file = file_get_contents($path);
+			// file_get_contents will return false if file not found. We will just return an empty string
 			if ($file === false) {
 				return "";
 			}
 
-			// Base64-encode everything that isn't in whitelist array
-			if (!preg_match("//u", $file)) {
-				$file = base64_encode($file);
+			// Base64 encode if flag is set
+			if (FunctionFlags::isset(ENCODE_B64)) {
+				$mime = mime_content_type($path);
+				$data = base64_encode($file);
+
+				// Return as "data URL"
+				return "data:${mime};base64,${data}";
 			}
 			
 			return $file;
