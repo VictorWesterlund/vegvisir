@@ -18,11 +18,11 @@
 		private function router() {
 			switch ($this->path) {
 				// Get static asset from user content
-				case (preg_match(Request::$preg_asset, $this->path) ? true : false):
+				case (preg_match($this::$preg_asset, $this->path) ? true : false):
 					return $this->asset();
 				
 				// Return script to be run in a JS Worker
-				case (preg_match(Request::$preg_worker, $this->path) ? true : false):
+				case (preg_match($this::$preg_worker, $this->path) ? true : false):
 					return $this->worker();
 
 				// Ignore requests to /favicon.ico which sometimes gets sent automatically

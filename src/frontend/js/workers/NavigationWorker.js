@@ -7,7 +7,9 @@ class NavigationWorker {
 			}
 		};
 
-		this.getPage(event.data);
+		this.event = event;
+
+		this.getPage();
 	}
 
 	// Create an empty Response with a status code only
@@ -18,27 +20,19 @@ class NavigationWorker {
 		});
 	}
 
-	// Create a new error Response from a recieved Response
-	async error(resp, data = ["main"]) {
-		const target = data[0];
-
-		// Simulate Response from server if error is internal
-		if (!resp instanceof Response) {
-			resp = this.newEmptyResponse(500);
+	async send(response) {
+		if (!response instanceof Response) {
+			response = this.newEmptyResponse();
 		}
 
-		// Attempt to load custom error page
-		const errorPage = await this.getPage([target, "/error/404"]);
-		if (errorPage.ok) {
-			return errorPage;
-		}
+		const body = await response.text();
 
-		// Create new Response with error HTML and forward HTTP status data
-		const html = `<main><h1>Error</h1><p>${resp.statusText}</main>`;
-		return new Response(html, { 
-			status: resp.status,
-			statusText: resp.statusText
-		});
+		globalThis.postMessage([
+			this.event.data[0], // Target element selector
+			body, // Page body
+			response.status, // HTTP status code
+			response.url // Loaded URL (after redirection etc.)
+		]);
 	}
 
 	// ----
@@ -62,36 +56,11 @@ class NavigationWorker {
 	}
 
 	// Request page from back-end
-	async getPage(data) {
-		const target = data[0];
-		const page = data[1];
+	async getPage() {
+		const [target, page] = this.event.data;
 
-		const req = new Request(page, this.options);
-		let resp = await fetch(req);
-
-		// Request failed, so show error page with status code
-		if(!resp.ok) {
-			resp = this.error(resp, data);
-		}
-		
-		/* 
-		 * Fetch response body as plaintext and send to main thread
-		 * so the browser can start parsing and painting the page ASAP
-		 */ 
-		const body = await resp.text();
-
-		// Send response back to initiator thread
-		globalThis.postMessage([
-			data[0], // Target element selector
-			body, // Page body
-			resp.status, // HTTP status code
-			resp.url // Loaded URL (after redirection etc.)
-		]);
-
-		// .. Get metadata for the page, such as <title> and more in the meantime
-		if (target === "main") {
-			this.getMeta(page);
-		}
+		const request = new Request(page, this.options);
+		await this.send(await fetch(request));
 
 		globalThis.close();
 	}
