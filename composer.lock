@@ -132,16 +132,16 @@
         },
         {
             "name": "victorwesterlund/functionflags",
-            "version": "1.0.2",
+            "version": "1.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/VictorWesterlund/functionflags.git",
-                "reference": "8296bf0efd394b35812d1c0cd3c22a0628926c09"
+                "reference": "cb38a4007f837943ec87fe27f8a9fed95068ba18"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/VictorWesterlund/functionflags/zipball/8296bf0efd394b35812d1c0cd3c22a0628926c09",
-                "reference": "8296bf0efd394b35812d1c0cd3c22a0628926c09",
+                "url": "https://api.github.com/repos/VictorWesterlund/functionflags/zipball/cb38a4007f837943ec87fe27f8a9fed95068ba18",
+                "reference": "cb38a4007f837943ec87fe27f8a9fed95068ba18",
                 "shasum": ""
             },
             "type": "library",
@@ -163,9 +163,9 @@
             "description": "An attempt to tame PHP constants for use as function/method flags",
             "support": {
                 "issues": "https://github.com/VictorWesterlund/functionflags/issues",
-                "source": "https://github.com/VictorWesterlund/functionflags/tree/1.0.2"
+                "source": "https://github.com/VictorWesterlund/functionflags/tree/1.0.3"
             },
-            "time": "2023-03-27T15:11:55+00:00"
+            "time": "2023-03-27T16:03:48+00:00"
         }
     ],
     "packages-dev": [],
