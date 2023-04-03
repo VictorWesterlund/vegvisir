@@ -1,19 +1,13 @@
 class NavigationWorker {
 	constructor(event) {
-		this.options = {
-			headers: {
-				// Tell the backend we only want page content, no app shell
-				"X-Navigation-Type": "contained"
-			}
-		};
-
 		this.event = event;
 
+		// Fetch page
 		this.getPage();
 	}
 
 	// Create an empty Response with a status code only
-	newEmptyResponse(code = 500, message = "NavigationWorker: Internal Server Error") {
+	newEmptyResponse(code = 500, message = "Pragma:NavigationWorker: Internal Server Error") {
 		return new Response(null, {
 			status: code,
 			statusText: message
@@ -35,32 +29,16 @@ class NavigationWorker {
 		]);
 	}
 
-	// ----
-
-	// Request metadata for page from backend
-	async getMeta(page) {
-		let options = {
-			headers: {
-				// Tell the backend we only want metadata for the page
-				"X-Navigation-Type": "meta"
-			}
-		};
-		
-		Object.assign(options, this.options);
-		
-		const req = new Request(page, options);
-		const resp = await fetch(req);
-
-		const json = await resp.json();
-		console.log("meta", json);
-	}
-
 	// Request page from back-end
 	async getPage() {
 		const [target, page] = this.event.data;
 
-		const request = new Request(page, this.options);
-		await this.send(await fetch(request));
+		await this.send(await fetch(new Request(page, {
+			headers: {
+				// Tell the backend we only want page content, no app shell
+				"X-Pragma-Navigation": true
+			}
+		})));
 
 		globalThis.close();
 	}

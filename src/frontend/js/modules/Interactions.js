@@ -1,9 +1,18 @@
-// Event handler for interactive components page
+// Event binder and handler for interactive elements
 class Interactions {
-	constructor(scope, methods = {}, autoBind = true) {
+
+	// Default options object used when constructing this class
+	static options = {
+		autoBind: true,
+		// The event type to bind
+		eventType: "click"
+	}
+
+	constructor(scope, methods = {}, options = {}) {
 		// Default "built-in" interactions
 		this.methods = {
 			nav: (event) => {
+				event.preventDefault();
 				new Navigation(event);
 			},
 			void: () => {}
@@ -12,11 +21,15 @@ class Interactions {
 		// Merge incoming- and default interactions
 		Object.assign(this.methods, methods);
 
+		// Merge default options with overrides
+		this.options = {};
+		this.options = Object.assign(this.options, Interactions.options, options);
+
 		this.scope = scope;
 		this.elements = new Set();
 		
 		// Bind elements on startup
-		if (autoBind) {
+		if (this.options.autoBind) {
 			this.bindAll();
 		}
 	}
@@ -28,7 +41,7 @@ class Interactions {
 				return "nav";
 
 			default:
-				console.warn("Undefined interaction", element);
+				console.warn("Pragma:Interactions: Undefined interaction", element);
 				return "void";
 		}
 	}
@@ -43,7 +56,7 @@ class Interactions {
 			}
 
 			// Call method when element is interacted with
-			element.addEventListener("click", event => {
+			element.addEventListener(this.options.eventType, event => {
 				event.stopPropagation(); // Don't bubble interaction to parent elements
 				this.methods[element.dataset.action](event);
 			});
