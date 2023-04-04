@@ -1,8 +1,17 @@
 // Multi-threaded SPA navigation handler
 class Navigation {
+	// Enum of available Event names that can be dispatched
+	static events = {
+		LOADED: "pragmaloaded",
+		LOADING: "pragmaloading",
+		WAITING: "pragmawaiting"
+	}
 
 	// Default options object used when constructing this class
 	static options = {
+		// Push navigation of this.main onto the history session stack
+		pushHistory: true,
+		// Merge search parameters from current page with new ones from navigation
 		carrySearchParams: false
 	}
 
@@ -15,6 +24,9 @@ class Navigation {
 		// Merge default options with overrides
 		this.options = {};
 		this.options = Object.assign(this.options, Navigation.options, options);
+
+		// $this.navigate() will abort from the signal of this object.
+		this.abortController = new AbortController();
 
 		// The root element used for top navigations (and the default target)
 		this.main = document.querySelector(globalThis._pragma.selector_main_element);
@@ -36,12 +48,17 @@ class Navigation {
 		}
 	}
 
-	// Push new entry with History API
+	// Push new history session entry onto the stack
 	historyPush(url) {
+		// The pushHistory option is disabled. Abort
+		if (!this.options.pushHistory) {
+			return false;
+		}
+
 		// Create URL instance from string
 		url = url instanceof URL ? url : new URL(url);
 
-		// Navigations to the env env page_index should be treated as root "/"
+		// Navigations to page_index should be treated as root "/"
 		if (url.pathname.substring(url.pathname.length - globalThis._pragma.page_index.length) === globalThis._pragma.page_index) {
 			url.pathname = url.pathname.substring(0, url.pathname.length - globalThis._pragma.page_index.length);
 		}
@@ -62,8 +79,7 @@ class Navigation {
 		target.parentElement.parentElement.scrollTo(0, 0); // Also reset scroll position for root element (Safari)
 
 		// Rebuild script tags as they don't execute with innerHTML per the HTML spec
-		const scripts = [...target.getElementsByTagName("script")];
-		scripts.forEach(script => {
+		[...target.getElementsByTagName("script")].forEach(script => {
 			const tag = document.createElement("script");
 
 			// Assign element attributes
@@ -129,7 +145,7 @@ class Navigation {
 
 			// Page is to be opened in a new tab. Do normal browser behaviour
 			case "_blank":
-				console.warn("Pragma:Navigation: target='_blank' from Navigation is not supported");
+				console.warn("Pragma:Navigation: target='_blank' from Pragma is not supported");
 				return window.open(this.url);
 
 			// Perform a normal navigation of the main element
@@ -193,47 +209,47 @@ class Navigation {
 		}
 	}
 
+	// Abort navigation in progress
+	abort() {
+		this.abortController.abort();
+		this.worker.terminate();
+	}
+
 	// Perform SPA navigation by fetching new page and modifing DOM
-	async navigate(target = null, rejectOnFail = false) {
+	async navigate(target = null) {
 		target = target ?? this.main;
-		this.dispatchEvents("pragmaloading", target);
+		this.dispatchEvents(Navigation.events.LOADING, target);
+
+		// Get element by CSS selector string
+		if (typeof target === "string") {
+			target = document.querySelector(target);
+		}
 		
 		// Tell Worker to fetch page
-		const selector = this.getCssSelector(target);
-		this.worker.postMessage([selector, this.url.toString()]);
+		this.worker.postMessage(this.url.toString());
 
-		const respTimeout = setTimeout(() => this.dispatchEvents("pragmawaiting", target), 300);
+		const waitingDelay = 5000;
+		// Dispatch Navigation.events.WAITING after waitingDelay timeout reached
+		const waiting = setTimeout(() => this.dispatchEvents(Navigation.events.WAITING, target), waitingDelay);
 
-		// Wait for Worker to fetch page
-		const nav = await new Promise((resolve) => {
+		// Wait for Worker to fetch page or abort if abort flag is set
+		return await new Promise((resolve) => {
 			this.worker.addEventListener("message", (event) => {
-				clearTimeout(respTimeout);
-				let [targetSelector, body, status, url] = event.data;
+				clearTimeout(waiting);
+				const [body, status, url] = event.data;
 
 				// Update DOM and resolve this and outer Promise
-				this.setTargetHtml(targetSelector, body);
-				this.dispatchEvents("pragmaloaded", document.querySelector(targetSelector));
+				this.setTargetHtml(target, body);
+				this.dispatchEvents(Navigation.events.LOADED, target);
 
 				// Target is a valid top navigation, do some stuff
-				if (target.tagName === this.main.tagName) {
+				if (target === this.main) {
 					// Add loaded URL to history
 					this.historyPush(url);
 				}
-
 				
 				resolve(event.data);
 			}, { once: true });
-		});
-
-		// Create new Respone and pass HTTP status code
-		const resp =  new Response(nav[1], { status: nav[2]});
-
-		// Resolve Promise with Response
-		if (!rejectOnFail) {
-			return Promise.resolve(resp);
-		}
-
-		// Align Promise completion with Response status
-		return resp.ok ? Promise.resolve(resp) : Promise.reject(resp);
+		}, { singal: this.abortController.signal });
 	}
 }

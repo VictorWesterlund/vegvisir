@@ -1,9 +1,9 @@
 <?php
 
+	// Library used to minify JS and CSS
 	use MatthiasMullie\Minify;
 
 	class Page {
-
 		// This class will look for this header to determine if we should send the env "page_document" or
 		// the contents of a specific page.
 		const PRAGMA_NAV_HEADER = "HTTP_X_PRAGMA_NAVIGATION";
