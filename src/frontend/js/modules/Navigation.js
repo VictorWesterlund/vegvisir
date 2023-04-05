@@ -12,7 +12,9 @@ class Navigation {
 		// Push navigation of this.main onto the history session stack
 		pushHistory: true,
 		// Merge search parameters from current page with new ones from navigation
-		carrySearchParams: false
+		carrySearchParams: false,
+		// Keep anchor link for this navigation
+		carryAnchor: false
 	}
 
 	constructor(source, options = {}) {
@@ -63,6 +65,11 @@ class Navigation {
 			url.pathname = url.pathname.substring(0, url.pathname.length - globalThis._pragma.page_index.length);
 		}
 
+		// Set hash from url as current anchor
+		window.location.hash = url.hash;
+		// But don't include it in the history stack
+		url.hash = "";
+
 		// Push entry to browser's session history stack
 		history.pushState({
 			url: url.toString(),
@@ -101,9 +108,8 @@ class Navigation {
 		try {
 			url = new URL(string);
 		} catch {
-			// Treat invalid URL as a pathname
-			url = new URL(window.location.href);
-			url.pathname = string;
+			// Treat invalid URL as a relative path
+			url = new URL(window.location.origin + (string !== globalThis._pragma.page_index ? string : ""));
 		}
 
 		// Carry existing top searchParams to new location
@@ -158,32 +164,6 @@ class Navigation {
 		this.navigate(target);
 	}
 
-	// Get CSS Selector from DOM node
-	getCssSelector(element) {
-		// Traverse the node tree backwards from target element
-		const path = [];
-		while (element.parentNode) {
-			// We found an id, stop here and use it as the entry point
-			if (element.id) {
-				path.unshift("#" + element.id);
-				break;
-			}
-
-			const parent = element.parentElement;
-			const index = [...parent.children]?.indexOf(element) + 1;
-
-			if (parent === document.documentElement) {
-				path.unshift(element.tagName);
-				break;
-			}
-
-			path.unshift(`${element.tagName}:nth-child(${index})`);
-			element = parent;
-		}
-
-		return path.join(" > ");
-	}
-
 	// Handle generic messages from Worker
 	messageHandler(event) {
 		// Nothing here yet
@@ -218,13 +198,16 @@ class Navigation {
 	// Perform SPA navigation by fetching new page and modifing DOM
 	async navigate(target = null) {
 		target = target ?? this.main;
+		// We need a local reference to the url object so the response listener can access it later
+		const url = this.url;
+
 		this.dispatchEvents(Navigation.events.LOADING, target);
 
 		// Get element by CSS selector string
 		if (typeof target === "string") {
 			target = document.querySelector(target);
 		}
-		
+
 		// Tell Worker to fetch page
 		this.worker.postMessage(this.url.toString());
 
@@ -236,7 +219,8 @@ class Navigation {
 		return await new Promise((resolve) => {
 			this.worker.addEventListener("message", (event) => {
 				clearTimeout(waiting);
-				const [body, status, url] = event.data;
+				// We're only interested in the page body
+				const [body] = event.data;
 
 				// Update DOM and resolve this and outer Promise
 				this.setTargetHtml(target, body);
