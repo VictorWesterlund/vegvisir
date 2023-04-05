@@ -22,7 +22,15 @@ Pragma is designed to be lightweight and efficient. Rather than including a broa
 
 By only including the core functionality needed for navigation and interaction, Pragma offers a number of benefits over other, more complex web frameworks. For one, it is much simpler to use and understand, making it ideal for beginners and developers who don't need or want all the bells and whistles of a larger framework.
 
-## Support
+# Usage
+
+[Documentation on the Pragma Wiki](https://github.com/VictorWesterlund/pragma/wiki)
+
+# Installation
+
+[Instructions in INSTALL.md](https://github.com/VictorWesterlund/pragma/blob/master/INSTALL.md)
+
+# Support
 
 ### Browsers
 ![Chrome-icon](https://user-images.githubusercontent.com/35688133/230028928-dca1467d-8c63-4e69-9524-78e5751eaf24.png)<br>Chrome|![Firefox_logo,_2019 svg](https://user-images.githubusercontent.com/35688133/230029200-624d0126-9640-4b78-9eb5-a2e4be4e51be.png)<br>Firefox|![Safari_browser_logo svg](https://user-images.githubusercontent.com/35688133/230029381-e7162ba1-e9ef-4b34-803f-043b5d16d365.png)<br>Safari
@@ -38,11 +46,3 @@ Version|Support
 \>8.0|✅
 7.4-8.0|✅👎 Depricated
 <7.4|❌
-
-# Usage
-
-[Documentation on the Pragma Wiki](https://github.com/VictorWesterlund/pragma/wiki)
-
-# Installation
-
-[Instructions in INSTALL.md](https://github.com/VictorWesterlund/pragma/blob/master/INSTALL.md)
