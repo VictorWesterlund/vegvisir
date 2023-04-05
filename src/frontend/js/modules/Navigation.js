@@ -1,53 +1,73 @@
+// Multi-threaded SPA navigation handler
 class Navigation {
-	constructor(source) {
-		this.worker = new Worker("/workers/NavigationWorker.js");
+	// Enum of available Event names that can be dispatched
+	static events = {
+		LOADED: "pragmaloaded",
+		LOADING: "pragmaloading",
+		WAITING: "pragmawaiting"
+	}
+
+	// Default options object used when constructing this class
+	static options = {
+		// Push navigation of this.main onto the history session stack
+		pushHistory: true,
+		// Merge search parameters from current page with new ones from navigation
+		carrySearchParams: false
+	}
+
+	constructor(source, options = {}) {
+		// Spin up dedicated worker
+		this.worker = new Worker("/_pragma_wrkr/NavigationWorker.js");
+		// Listen for status messages from worker
 		this.worker.addEventListener("message", event => this.messageHandler(event));
 
+		// Merge default options with overrides
+		this.options = {};
+		this.options = Object.assign(this.options, Navigation.options, options);
+
+		// $this.navigate() will abort from the signal of this object.
+		this.abortController = new AbortController();
+
 		// The root element used for top navigations (and the default target)
-		this.main = document.getElementsByTagName("main")[0];
+		this.main = document.querySelector(globalThis._pragma.selector_main_element);
 
-		// Create URL object from string or event
-		if (!(source instanceof URL)) {
-			if (typeof source === "string") {
+		// Build URL from various sources
+		switch (source.constructor) {
+			case URL:
+				this.url = source;
+				break;
+
+			case PointerEvent:
+			case MouseEvent:
+				this.url = this.eventHandler(source);
+				break;
+
+			case String:
+			default:
 				this.url = this.urlFromString(source);
-			}
-
-			// Handle events
-			if (source instanceof Event) {
-				this.eventHandler(source);
-			}
-		} else {
-			// Source is a URL object, use it directly
-			this.url = source;
 		}
 	}
 
-	// Push new entry with History API
+	// Push new history session entry onto the stack
 	historyPush(url) {
-		// Create URL object from string
+		// The pushHistory option is disabled. Abort
+		if (!this.options.pushHistory) {
+			return false;
+		}
+
+		// Create URL instance from string
 		url = url instanceof URL ? url : new URL(url);
 
-		if (url.pathname === "/index") {
-			url.pathname = "/";
+		// Navigations to page_index should be treated as root "/"
+		if (url.pathname.substring(url.pathname.length - globalThis._pragma.page_index.length) === globalThis._pragma.page_index) {
+			url.pathname = url.pathname.substring(0, url.pathname.length - globalThis._pragma.page_index.length);
 		}
 
-		const state = {
-			url: url.toString()
-		}
-
-		history.pushState(state, "", url);
-	}
-
-	// Scroll to anchor element in DOM
-	scrollToAnchor() {
-		const hash = window.location.hash.substring(1);
-		const anchor = document.getElementById(hash) ?? null;
-
-		// Scroll top to anchor element if it exists in the DOM
-		if (anchor !== null) {
-			const top = document.getElementById("top");
-			top.scrollTo(0, anchor.offsetTop);
-		}
+		// Push entry to browser's session history stack
+		history.pushState({
+			url: url.toString(),
+			options: this.options
+		}, "", url.toString());
 	}
 
 	// Replace inner DOM of target element with stringified HTML
@@ -59,8 +79,7 @@ class Navigation {
 		target.parentElement.parentElement.scrollTo(0, 0); // Also reset scroll position for root element (Safari)
 
 		// Rebuild script tags as they don't execute with innerHTML per the HTML spec
-		const scripts = [...target.getElementsByTagName("script")];
-		scripts.forEach(script => {
+		[...target.getElementsByTagName("script")].forEach(script => {
 			const tag = document.createElement("script");
 
 			// Assign element attributes
@@ -73,11 +92,6 @@ class Navigation {
 			script.remove();
 			target.appendChild(tag);
 		});
-
-		// URL is a top navigation and contains a hash
-		if (target.id == "top" && window.location.hash.length > 0) {
-			this.scrollToAnchor();
-		}
 	}
 
 	// Turn URL string or pathname into a URL object
@@ -93,46 +107,55 @@ class Navigation {
 		}
 
 		// Carry existing top searchParams to new location
-		url.search = new URLSearchParams({
-			...Object.fromEntries(new URLSearchParams(window.location.search)),
-			...Object.fromEntries(new URLSearchParams(url.search))
-		}).toString();
+		if (this.options.carrySearchParams) {
+			url.search = new URLSearchParams({
+				...Object.fromEntries(new URLSearchParams(window.location.search)),
+				...Object.fromEntries(new URLSearchParams(url.search))
+			});
+		}
 
-		return url;
+		return url.toString();
 	}
 
 	// Extract URL and target from received event
 	eventHandler(event) {
-		event.preventDefault();
-
 		// Is activation type event
-		if (event.constructor === PointerEvent || event.constructor === MouseEvent) {
-			const element = event.target.closest("a");
-			let target = element.getAttribute("target");
+		const element = event.target.closest("a");
 
-			this.url = this.urlFromString(element.href);
-			
-			// Use the target attribute of the element to determine where to inject loaded content
-			switch (target) {
-				// Replace inner DOM of the the clicked element
-				case "_self":
-					target = event.target;
-					break;
-
-				// Replace inner DOM of target's closest parent element (will remove clicked element from DOM)
-				case "_parent":
-					target = element.parentElement;
-					break;
-
-				// Replace element inner DOM by id, or default to #top (#top will update URL and History API)
-				case "_top":
-				default:
-					target = document.getElementById(target) ?? document.getElementById("top");
-					break;
-			}
-
-			this.navigate(target);
+		if (!element) {
+			console.error("Pragma:Navigation: No anchor tag found between target and root", event.target);
+			return;
 		}
+
+		let target = element.getAttribute("target");
+
+		this.url = this.urlFromString(element.href);
+		
+		// Use the target attribute of the element to determine where to inject loaded content
+		switch (target) {
+			// Replace inner DOM of the the clicked element
+			case "_self":
+				target = event.target;
+				break;
+
+			// Replace inner DOM of target's closest parent element (will remove clicked element from DOM)
+			case "_parent":
+				target = element.parentElement;
+				break;
+
+			// Page is to be opened in a new tab. Do normal browser behaviour
+			case "_blank":
+				console.warn("Pragma:Navigation: target='_blank' from Pragma is not supported");
+				return window.open(this.url);
+
+			// Perform a normal navigation of the main element
+			case "_top":
+			default:
+				target = this.main;
+				break;
+		}
+
+		this.navigate(target);
 	}
 
 	// Get CSS Selector from DOM node
@@ -163,11 +186,8 @@ class Navigation {
 
 	// Handle generic messages from Worker
 	messageHandler(event) {
-		switch (event.data[0]) {
-			case "META":
-				console.log("Metadata received");
-				break;
-		}
+		// Nothing here yet
+		return;
 	}
 
 	// Emit a loading/loaded event on window and target
@@ -189,47 +209,47 @@ class Navigation {
 		}
 	}
 
+	// Abort navigation in progress
+	abort() {
+		this.abortController.abort();
+		this.worker.terminate();
+	}
+
 	// Perform SPA navigation by fetching new page and modifing DOM
-	async navigate(target = null, rejectOnFail = false) {
+	async navigate(target = null) {
 		target = target ?? this.main;
-		this.dispatchEvents("pragmaloading", target);
+		this.dispatchEvents(Navigation.events.LOADING, target);
+
+		// Get element by CSS selector string
+		if (typeof target === "string") {
+			target = document.querySelector(target);
+		}
 		
 		// Tell Worker to fetch page
-		const selector = this.getCssSelector(target);
-		this.worker.postMessage([selector, this.url.toString()]);
+		this.worker.postMessage(this.url.toString());
 
-		const respTimeout = setTimeout(() => this.dispatchEvents("pragmawaiting", target), 300);
+		const waitingDelay = 5000;
+		// Dispatch Navigation.events.WAITING after waitingDelay timeout reached
+		const waiting = setTimeout(() => this.dispatchEvents(Navigation.events.WAITING, target), waitingDelay);
 
-		// Wait for Worker to fetch page
-		const nav = await new Promise((resolve) => {
+		// Wait for Worker to fetch page or abort if abort flag is set
+		return await new Promise((resolve) => {
 			this.worker.addEventListener("message", (event) => {
-				clearTimeout(respTimeout);
-				let [targetSelector, body, status, url] = event.data;
+				clearTimeout(waiting);
+				const [body, status, url] = event.data;
 
 				// Update DOM and resolve this and outer Promise
-				this.setTargetHtml(targetSelector, body);
-				this.dispatchEvents("pragmaloaded", document.querySelector(targetSelector));
+				this.setTargetHtml(target, body);
+				this.dispatchEvents(Navigation.events.LOADED, target);
 
 				// Target is a valid top navigation, do some stuff
-				if (target.tagName === this.main.tagName) {
+				if (target === this.main) {
 					// Add loaded URL to history
 					this.historyPush(url);
 				}
-
 				
 				resolve(event.data);
 			}, { once: true });
-		});
-
-		// Create new Respone and pass HTTP status code
-		const resp =  new Response(nav[1], { status: nav[2]});
-
-		// Resolve Promise with Response
-		if (!rejectOnFail) {
-			return Promise.resolve(resp);
-		}
-
-		// Align Promise completion with Response status
-		return resp.ok ? Promise.resolve(resp) : Promise.reject(resp);
+		}, { singal: this.abortController.signal });
 	}
 }

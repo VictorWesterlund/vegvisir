@@ -2,34 +2,32 @@
 
 	require_once Path::pragma("src/request/Page.php");
 
-	class Request {
+	enum StaticPathRegex: string {
+		case ASSET  = "/^\/assets\/*/";
+		case WORKER = "/^\/_pragma_wrkr\/*/"; // "Pragma worker"
+	}
 
-		private static $preg_asset = "/^\/assets\/*/";
-		private static $preg_worker = "/^\/worker\/*/";
-
+	class Router {
 		public function __construct() {
 			// Get pathname from request URI
 			$this->path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
-			$this->router();
-		}
-
-		// Request router
-		private function router() {
+			// Perform request routing
 			switch ($this->path) {
 				// Get static asset from user content
-				case (preg_match($this::$preg_asset, $this->path) ? true : false):
+				case (preg_match(StaticPathRegex::ASSET->value, $this->path) ? true : false):
 					return $this->asset();
 				
 				// Return script to be run in a JS Worker
-				case (preg_match($this::$preg_worker, $this->path) ? true : false):
+				case (preg_match(StaticPathRegex::WORKER->value, $this->path) ? true : false):
 					return $this->worker();
 
 				// Ignore requests to /favicon.ico which sometimes gets sent automatically
 				// by browsers when a an icon meta tag is not specified. We don't want to prepare
 				// a whole page instance for this.
 				case "/favicon.ico": 
-					return $this->void();
+					// Return no content response
+					return Page::error(204);
 
 				// Pass request to Page() initializer
 				default:
@@ -38,12 +36,8 @@
 		}
 
 		private function get_requested_path(): string {
-			$path = $this->path;
-
 			// Requests to root of user content path should be rewritten to /index
-			if ($this->path === "/") {
-				$path = "index";
-			}
+			$path = $this->path !== "/" ? $this->path : "index";
 
 			// Strip leading slash
 			if (strpos($this->path, "/") === 0) {
@@ -53,19 +47,13 @@
 			return $path;
 		}
 
-		// Return empty response
-		private function void(): never {
-			// No content
-			http_response_code(204);
-			exit();
-		}
-
 		// Return contents of a JS file to be run inside a JS Worker
 		private function worker(): never {
-			$path = $this->get_requested_path();
+			// Get crumbs from pathname
+			$crumbs = explode("/", $this->get_requested_path());
 
-			// Check if worker script exists
-			$file = Path::pragma("src/frontend/js/${path}");
+			// Get only worker file name from path (last crumb)
+			$file = Path::pragma("src/frontend/js/workers/" . end($crumbs));
 			if (!is_file($file)) {
 				http_response_code(404);
 				die("Not a worker");
@@ -84,7 +72,7 @@
 
 			// Get MIME-type for file or default to plaintext
 			$type = mime_content_type($file);
-			if (!$type || $type === "application/x-empty") {
+			if (empty($type) || $type === "application/x-empty") {
 				$type = "text/plain";
 			}
 

@@ -1,28 +1,21 @@
 <?php
 
+	// Library used to minify JS and CSS
 	use MatthiasMullie\Minify;
 
 	class Page {
-		public function __construct(string $page = "document") {
-			// Check if request is for partial content
-			if (array_key_exists("HTTP_X_NAVIGATION_TYPE", $_SERVER)) {
-				switch ($_SERVER["HTTP_X_NAVIGATION_TYPE"]) {
-					// Request is for a page
-					case "contained":
-						Page::include($page, true);
-						break;
+		// This class will look for this header to determine if we should send the env "page_document" or
+		// the contents of a specific page.
+		const PRAGMA_NAV_HEADER = "HTTP_X_PRAGMA_NAVIGATION";
 
-					default:
-						http_response_code(422);
-						die("NAVIGATION_TYPE not supported");		
-				}
-			} else {
-				// Serve the whole document on (re)load
-				Page::include("document");
-			}
+		public function __construct(string $page = null) {
+			$page = !empty($_SERVER[$this::PRAGMA_NAV_HEADER]) ? $page : $_ENV[Path::ENV_NS]["page_document"];
+
+			// Return the requested page
+			$this::include($page);
 		}
 
-		private static function error(int $code): never {
+		public static function error(int $code): never {
 			http_response_code($code);
 			exit();
 		}
@@ -46,35 +39,6 @@
 
 			// Default to framework static asset if no user site asset found
 			return Path::pragma("src/frontend/${folder}/${file}");
-		}
-
-		// Set or get locale cookie from reference list of hostnames
-		private static function get_locale(string $locale = null): string {
-			$locales = Path::contents(Path::root("pages"));
-
-			if (!empty($_COOKIE["user_locale"]) && in_array($_COOKIE["user_locale"], $locales)) {
-				return $_COOKIE["user_locale"];
-			}
-			
-			// Locale arg not provided, use the first locale in user content pages
-			// as default.
-			if (empty($locale)) {
-				if (empty($locales)) {
-					http_response_code(404);
-					die("No pages defined");
-				}
-
-				$locale = $locales[0];
-			}
-
-			// Set and return locale cookie if provided
-			if (!empty($locale)) {
-				setcookie("user_locale", $locale, 0, "/");
-				return $locale;
-			}
-
-			// Return already set locale cookie
-			return $_COOKIE["user_locale"];
 		}
 
 		// These functions are exposed to all pages. They can be called
@@ -130,19 +94,17 @@
 
 		// Load an external document into the current document
 		public static function include(string $name) {
-			// Rewrite empty path to "index" page
-			if ($name === "/") {
-				$name = "/index";
-			}
+			// Rewrite empty path and "/" to page_index
+			$name = !empty($name) && $name !== "/" ? $name : $_ENV[Path::ENV_NS]["page_index"];
 
 			// Attempt to load from user content pages
-			$locale = Page::get_locale();
-			$file = Path::root("pages/${locale}/${name}.php");
+			$file = Path::root("pages/${name}.php");
 
 			if (!is_file($file)) {
 				return Page::error(404);
 			}
 
+			// Import and run PHP file
 			include $file;
 		}
 

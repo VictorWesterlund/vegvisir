@@ -9,11 +9,22 @@ globalThis.pragma = {
 	Navigation: (...args) => new Navigation(...args)
 };
 
-globalThis.pragma.Navigation(window.location.pathname.length > 1 ? window.location.pathname : "/index").navigate(document.querySelector("main"));
+// Fetch requested page on initial load
+globalThis.pragma.Navigation(window.location.pathname.length > 1 ? window.location.pathname : globalThis._pragma.page_index, {
+	// We want search parameters on initial load to be passed to requested page
+	carrySearchParams: true
+})
+// Navigate the root element defined in Pragma env file
+.navigate(document.querySelector(globalThis._pragma.selector_main_element));
 
 // Handle browser back/forward buttons
 window.addEventListener("popstate", (event) => {
+	event.preventDefault();
+
+	// Force pushHistory to false as we don't want this navigation on the stack
+	event.state.options.pushHistory = false;
+	
 	if ("url" in event.state) {
-		globalThis.pragma.Navigation(event.state.url).navigate();
+		globalThis.pragma.Navigation(event.state.url, event.state.options).navigate();
 	}
 });
