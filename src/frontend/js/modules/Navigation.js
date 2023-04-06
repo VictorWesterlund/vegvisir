@@ -12,9 +12,7 @@ class Navigation {
 		// Push navigation of this.main onto the history session stack
 		pushHistory: true,
 		// Merge search parameters from current page with new ones from navigation
-		carrySearchParams: false,
-		// Keep anchor link for this navigation
-		carryAnchor: false
+		carrySearchParams: false
 	}
 
 	constructor(source, options = {}) {
