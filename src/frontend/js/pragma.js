@@ -21,10 +21,15 @@ globalThis.pragma.Navigation(window.location.pathname.length > 1 ? window.locati
 window.addEventListener("popstate", (event) => {
 	event.preventDefault();
 
+	// This event does not have any state data. Ignore it
+	if (event.state === null) {
+		return;
+	}
+
 	// Force pushHistory to false as we don't want this navigation on the stack
 	event.state.options.pushHistory = false;
 	
 	if ("url" in event.state) {
-		globalThis.pragma.Navigation(event.state.url, event.state.options).navigate();
+		return globalThis.pragma.Navigation(event.state.url, event.state.options).navigate();
 	}
 });
