@@ -5,23 +5,12 @@ class NavigationWorker {
 		this.getPage();	
 	}
 
-	// Create an empty Response with a status code only
-	newEmptyResponse(code = 500, message = "Pragma:NavigationWorker: Internal Server Error") {
-		return new Response(null, {
-			status: code,
-			statusText: message
-		});
-	}
-
 	async send(response) {
-		// Didn't get a response object
-		if (!response instanceof Response) {
-			return globalThis.postMessage([-1, null]);
-		}
-
-		const body = await response.text();
-
-		globalThis.postMessage([body, response.status, response.url]);
+		return response instanceof Response 
+			// Return page as plaintext along with the response HTTP status and the fetched URL
+			? globalThis.postMessage([await response.text(), response.status, response.url])
+			// Didn't get a response object
+			: globalThis.postMessage([-1, null]);
 	}
 
 	// Request page from back-end
