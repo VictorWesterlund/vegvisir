@@ -7,17 +7,36 @@
 		// This class will look for this header to determine if we should send the env "page_document" or
 		// the contents of a specific page.
 		const PRAGMA_NAV_HEADER = "HTTP_X_PRAGMA_NAVIGATION";
+		// HTTP status code environment variable name used with custom error pages
+		const HTTP_ERROR = "http_status";
 
 		public function __construct(string $page = null) {
+			// Return specific page if the Pragma "nav header" is detected, else return the app shell which in turn
+			// should spin up a Navigation to the requested specific page.
 			$page = !empty($_SERVER[$this::PRAGMA_NAV_HEADER]) ? $page : $_ENV[Path::ENV_NS]["page_document"];
 
 			// Return the requested page
 			$this::include($page);
 		}
 
-		public static function error(int $code): never {
+		// Set HTTP response code and return error page if enabled
+		public static function error(int $code) {
 			http_response_code($code);
-			exit();
+
+			// No custom error page is defined, just exit here
+			if (!in_array("error_page_path", array_keys($_ENV[Path::ENV_NS]))) {
+				exit();
+			}
+			
+			// Put error code into environment variable so the custom error page can access it if desired
+			$_ENV[Path::ENV_NS][Page::HTTP_ERROR] = $code;
+
+			include Path::root(
+				// Append .php extension if omitted
+				substr($_ENV[Path::ENV_NS]["error_page_path"], -4) === ".php" 
+					? $_ENV[Path::ENV_NS]["error_page_path"]
+					: $_ENV[Path::ENV_NS]["error_page_path"] . ".php"
+			);
 		}
 
 		// Return absolute path to asset on disk.
@@ -50,12 +69,8 @@
 			// An unset relative flag will make the path absolute.
 			$file = $relative ? Page::get_asset_path("css", $file) : $file;
 
-			if(!is_file($file)) {
-				return "";
-			}
-
-			$minifier = new Minify\CSS($file);
-			return $minifier->minify();
+			// Import and minify CSS stylesheet or return empty string if not found
+			return is_file($file) ? (new Minify\CSS($file))->minify() : "";
 		}
 
 		// Return minified JS from file
@@ -64,12 +79,8 @@
 			// An unset relative flag will make the path absolute.
 			$file = $relative ? Page::get_asset_path("js", $file) : $file;
 
-			if(!is_file($file)) {
-				return "";
-			}
-
-			$minifier = new Minify\JS($file);
-			return $minifier->minify();
+			// Import and minify JS source or return empty string if not found
+			return is_file($file) ? (new Minify\JS($file))->minify() : "";
 		}
 
 		// Return contents of media file as base64-encoded string unless whitelisted
@@ -92,7 +103,7 @@
 			return $file;
 		}
 
-		// Load an external document into the current document
+		// Include external PHP file from user site into the current document
 		public static function include(string $name) {
 			// Rewrite empty path and "/" to page_index
 			$name = !empty($name) && $name !== "/" ? $name : $_ENV[Path::ENV_NS]["page_index"];
