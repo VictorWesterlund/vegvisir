@@ -6,14 +6,14 @@
 	class Page {
 		// This class will look for this header to determine if we should send the env "page_document" or
 		// the contents of a specific page.
-		const PRAGMA_NAV_HEADER = "HTTP_X_PRAGMA_NAVIGATION";
+		const VEGVISIR_NAV_HEADER = "HTTP_X_VEGVISIR_NAVIGATION";
 		// HTTP status code environment variable name used with custom error pages
 		const HTTP_ERROR = "http_status";
 
 		public function __construct(string $page = null) {
-			// Return specific page if the Pragma "nav header" is detected, else return the app shell which in turn
+			// Return specific page if the Vegvisir "nav header" is detected, else return the app shell which in turn
 			// should spin up a Navigation to the requested specific page.
-			$page = !empty($_SERVER[$this::PRAGMA_NAV_HEADER]) ? $page : $_ENV[Path::ENV_NS]["page_document"];
+			$page = !empty($_SERVER[$this::VEGVISIR_NAV_HEADER]) ? $page : $_ENV[Path::ENV_NS]["page_document"];
 
 			// Return the requested page
 			$this::include($page);
@@ -57,7 +57,7 @@
 			}
 
 			// Default to framework static asset if no user site asset found
-			return Path::pragma("src/frontend/${folder}/${file}");
+			return Path::vegvisir("src/frontend/${folder}/${file}");
 		}
 
 		// These functions are exposed to all pages. They can be called
@@ -120,6 +120,6 @@
 		}
 
 		public static function init() {
-			include Path::pragma("src/frontend/bundle.php");
+			include Path::vegvisir("src/frontend/bundle.php");
 		}
 	}

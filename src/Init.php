@@ -6,12 +6,12 @@
 		const ENV_INI = ".env.ini";
 		// Namespace to store env variables in the $_ENV superglobal.
 		// Variables exported to JavaScript will also have this namespace on the globalThis
-		const ENV_NS = "_pragma";
+		const ENV_NS = "_vegvisir";
 		// Path to composer autoload script
 		const COMPOSER_AUTOLOAD = "vendor/autoload.php";
 
-		// Get root of Pragma installation for accesing framework files
-		public static function pragma(string $crumbs = ""): string {
+		// Get root of Vegvisir installation for accesing framework files
+		public static function vegvisir(string $crumbs = ""): string {
 			return dirname(__DIR__) . "/" . $crumbs;
 		}
 
@@ -27,10 +27,10 @@
 	}
 
 	// Load Composer dependencies
-	require_once Path::pragma(Path::COMPOSER_AUTOLOAD);
+	require_once Path::vegvisir(Path::COMPOSER_AUTOLOAD);
 
-	// Put environment variables from Pragma .ini into namespaced superglobal
-	$_ENV[Path::ENV_NS] = parse_ini_file(Path::pragma(Path::ENV_INI), true);
+	// Put environment variables from Vegvisir .ini into namespaced superglobal
+	$_ENV[Path::ENV_NS] = parse_ini_file(Path::vegvisir(Path::ENV_INI), true);
 
 	// Merge environment variables from user site into superglobal
 	if (file_exists(Path::root(Path::ENV_INI))) {

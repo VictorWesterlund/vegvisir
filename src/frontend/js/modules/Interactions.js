@@ -41,7 +41,7 @@ class Interactions {
 				return "nav";
 
 			default:
-				console.warn("Pragma:Interactions: Undefined interaction", element);
+				console.warn("Vegvisir:Interactions: Undefined interaction", element);
 				return "void";
 		}
 	}

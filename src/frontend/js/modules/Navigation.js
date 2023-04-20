@@ -2,9 +2,9 @@
 class Navigation {
 	// Enum of available Event names that can be dispatched
 	static events = {
-		LOADED: "pragmaloaded",
-		LOADING: "pragmaloading",
-		WAITING: "pragmawaiting"
+		LOADED: "vegvisirloaded",
+		LOADING: "vegvisirloading",
+		WAITING: "vegvisirwaiting"
 	}
 
 	// Default options object used when constructing this class
@@ -17,7 +17,7 @@ class Navigation {
 
 	constructor(source, options = {}) {
 		// Spin up dedicated worker
-		this.worker = new Worker("/_pragma_wrkr/NavigationWorker.js");
+		this.worker = new Worker("/_vegvisir_wrkr/NavigationWorker.js");
 		// Listen for status messages from worker
 		this.worker.addEventListener("message", event => this.messageHandler(event));
 
@@ -29,7 +29,7 @@ class Navigation {
 		this.abortController = new AbortController();
 
 		// The root element used for top navigations (and the default target)
-		this.main = document.querySelector(globalThis._pragma.selector_main_element);
+		this.main = document.querySelector(globalThis._vegvisir.selector_main_element);
 
 		// Build URL from various sources
 		switch (source.constructor) {
@@ -59,8 +59,8 @@ class Navigation {
 		url = url instanceof URL ? url : new URL(url);
 
 		// Navigations to page_index should be treated as root "/"
-		if (url.pathname.substring(url.pathname.length - globalThis._pragma.page_index.length) === globalThis._pragma.page_index) {
-			url.pathname = url.pathname.substring(0, url.pathname.length - globalThis._pragma.page_index.length);
+		if (url.pathname.substring(url.pathname.length - globalThis._vegvisir.page_index.length) === globalThis._vegvisir.page_index) {
+			url.pathname = url.pathname.substring(0, url.pathname.length - globalThis._vegvisir.page_index.length);
 		}
 
 		// Set hash from url as current anchor
@@ -107,7 +107,7 @@ class Navigation {
 			url = new URL(string);
 		} catch {
 			// Treat invalid URL as a relative path
-			url = new URL(window.location.origin + (string !== globalThis._pragma.page_index ? string : ""));
+			url = new URL(window.location.origin + (string !== globalThis._vegvisir.page_index ? string : ""));
 		}
 
 		// Carry existing top searchParams to new location
@@ -127,7 +127,7 @@ class Navigation {
 		const element = event.target.closest("a");
 
 		if (!element) {
-			console.error("Pragma:Navigation: No anchor tag found between target and root", event.target);
+			console.error("Vegvisir:Navigation: No anchor tag found between target and root", event.target);
 			return;
 		}
 
@@ -149,7 +149,7 @@ class Navigation {
 
 			// Page is to be opened in a new tab. Do normal browser behaviour
 			case "_blank":
-				console.warn("Pragma:Navigation: target='_blank' from Pragma is not supported");
+				console.warn("Vegvisir:Navigation: target='_blank' from Vegvisir is not supported");
 				return window.open(this.url);
 
 			// Perform a normal navigation of the main element
