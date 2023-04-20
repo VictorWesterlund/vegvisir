@@ -2,6 +2,7 @@
 
 	// Library used to minify JS and CSS
 	use MatthiasMullie\Minify;
+	// Library that enables the use of function flags using PHP constants
 	use FunctionFlags\FunctionFlags;
 
 	class Page {
