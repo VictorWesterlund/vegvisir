@@ -17,7 +17,7 @@
 				"PATH_ABSOLUTE",
 				"ENCODE_B64"
 			]);
-			
+
 			// Return specific page if the Vegvisir "nav header" is detected, else return the app shell which in turn
 			// should spin up a Navigation to the requested specific page.
 			$page = !empty($_SERVER[$this::VEGVISIR_NAV_HEADER]) ? $page : $_ENV[Path::ENV_NS]["page_document"];
@@ -76,13 +76,8 @@
 			// An unset relative flag will make the path absolute.
 			$path = !FunctionFlags::isset(PATH_ABSOLUTE) ? Page::get_asset_path("css", $path) : $path;
 
-<<<<<<< HEAD
-			// Load and minify CSS if file found. Else return empty string
-			return is_file($path) ? (new Minify\CSS($path))->minify() : "";
-=======
 			// Import and minify CSS stylesheet or return empty string if not found
-			return is_file($file) ? (new Minify\CSS($file))->minify() : "";
->>>>>>> master
+			return is_file($path) ? (new Minify\CSS($path))->minify() : "";
 		}
 
 		// Return minified JS from file
@@ -91,13 +86,8 @@
 			// An unset relative flag will make the path absolute.
 			$path = !FunctionFlags::isset(PATH_ABSOLUTE) ? Page::get_asset_path("js", $path) : $path;
 
-<<<<<<< HEAD
-			// Load and minify JS if file found. Else return empty string
-			return is_file($path) ? (new Minify\JS($path))->minify() : "";
-=======
 			// Import and minify JS source or return empty string if not found
-			return is_file($file) ? (new Minify\JS($file))->minify() : "";
->>>>>>> master
+			return is_file($path) ? (new Minify\JS($path))->minify() : "";
 		}
 
 		// Return contents of media file as base64-encoded string unless whitelisted

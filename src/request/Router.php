@@ -27,12 +27,18 @@
 				// a whole page instance for this.
 				case "/favicon.ico": 
 					// Return no content response
-					return Page::error(204);
+					return Router::void(404);
 
 				// Pass request to Page() initializer
 				default:
 					return new Page($this->get_requested_path());
 			}
+		}
+
+		// Close the connection with a status code and empty body
+		private static function void($code = 400): never {
+			http_response_code($code);
+			exit();
 		}
 
 		private function get_requested_path(): string {
