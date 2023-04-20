@@ -19,7 +19,7 @@ class NavigationWorker {
 			await fetch(new Request(this.event.data, {
 				headers: {
 					// Tell the backend we only want page content, no app shell
-					"X-Pragma-Navigation": true
+					"X-Vegvisir-Navigation": true
 				}
 			}))
 		);
