@@ -1,10 +1,10 @@
 <?php
 
-	require_once Path::pragma("src/request/Page.php");
+	require_once Path::vegvisir("src/request/Page.php");
 
 	enum StaticPathRegex: string {
 		case ASSET  = "/^\/assets\/*/";
-		case WORKER = "/^\/_pragma_wrkr\/*/"; // "Pragma worker"
+		case WORKER = "/^\/_vegvisir_wrkr\/*/"; // "Vegvisir worker"
 	}
 
 	class Router {
@@ -53,7 +53,7 @@
 			$crumbs = explode("/", $this->get_requested_path());
 
 			// Get only worker file name from path (last crumb)
-			$file = Path::pragma("src/frontend/js/workers/" . end($crumbs));
+			$file = Path::vegvisir("src/frontend/js/workers/" . end($crumbs));
 			if (!is_file($file)) {
 				http_response_code(404);
 				die("Not a worker");

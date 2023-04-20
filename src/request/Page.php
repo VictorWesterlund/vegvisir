@@ -8,7 +8,9 @@
 	class Page {
 		// This class will look for this header to determine if we should send the env "page_document" or
 		// the contents of a specific page.
-		const PRAGMA_NAV_HEADER = "HTTP_X_PRAGMA_NAVIGATION";
+		const VEGVISIR_NAV_HEADER = "HTTP_X_VEGVISIR_NAVIGATION";
+		// HTTP status code environment variable name used with custom error pages
+		const HTTP_ERROR = "http_status";
 
 		public function __construct(string $page = null) {
 			FunctionFlags::define([
@@ -16,15 +18,32 @@
 				"ENCODE_B64"
 			]);
 			
-			$page = !empty($_SERVER[$this::PRAGMA_NAV_HEADER]) ? $page : $_ENV[Path::ENV_NS]["page_document"];
+			// Return specific page if the Vegvisir "nav header" is detected, else return the app shell which in turn
+			// should spin up a Navigation to the requested specific page.
+			$page = !empty($_SERVER[$this::VEGVISIR_NAV_HEADER]) ? $page : $_ENV[Path::ENV_NS]["page_document"];
 
 			// Return the requested page
 			$this::include($page);
 		}
 
-		public static function error(int $code): never {
+		// Set HTTP response code and return error page if enabled
+		public static function error(int $code) {
 			http_response_code($code);
-			exit();
+
+			// No custom error page is defined, just exit here
+			if (!in_array("error_page_path", array_keys($_ENV[Path::ENV_NS]))) {
+				exit();
+			}
+			
+			// Put error code into environment variable so the custom error page can access it if desired
+			$_ENV[Path::ENV_NS][Page::HTTP_ERROR] = $code;
+
+			include Path::root(
+				// Append .php extension if omitted
+				substr($_ENV[Path::ENV_NS]["error_page_path"], -4) === ".php" 
+					? $_ENV[Path::ENV_NS]["error_page_path"]
+					: $_ENV[Path::ENV_NS]["error_page_path"] . ".php"
+			);
 		}
 
 		// Return absolute path to asset on disk.
@@ -45,7 +64,7 @@
 			}
 
 			// Default to framework static asset if no user site asset found
-			return Path::pragma("src/frontend/${folder}/${file}");
+			return Path::vegvisir("src/frontend/${folder}/${file}");
 		}
 
 		// These functions are exposed to all pages. They can be called
@@ -57,8 +76,13 @@
 			// An unset relative flag will make the path absolute.
 			$path = !FunctionFlags::isset(PATH_ABSOLUTE) ? Page::get_asset_path("css", $path) : $path;
 
+<<<<<<< HEAD
 			// Load and minify CSS if file found. Else return empty string
 			return is_file($path) ? (new Minify\CSS($path))->minify() : "";
+=======
+			// Import and minify CSS stylesheet or return empty string if not found
+			return is_file($file) ? (new Minify\CSS($file))->minify() : "";
+>>>>>>> master
 		}
 
 		// Return minified JS from file
@@ -67,8 +91,13 @@
 			// An unset relative flag will make the path absolute.
 			$path = !FunctionFlags::isset(PATH_ABSOLUTE) ? Page::get_asset_path("js", $path) : $path;
 
+<<<<<<< HEAD
 			// Load and minify JS if file found. Else return empty string
 			return is_file($path) ? (new Minify\JS($path))->minify() : "";
+=======
+			// Import and minify JS source or return empty string if not found
+			return is_file($file) ? (new Minify\JS($file))->minify() : "";
+>>>>>>> master
 		}
 
 		// Return contents of media file as base64-encoded string unless whitelisted
@@ -95,7 +124,7 @@
 			return $file;
 		}
 
-		// Load an external document into the current document
+		// Include external PHP file from user site into the current document
 		public static function include(string $name) {
 			// Rewrite empty path and "/" to page_index
 			$name = !empty($name) && $name !== "/" ? $name : $_ENV[Path::ENV_NS]["page_index"];
@@ -112,6 +141,6 @@
 		}
 
 		public static function init() {
-			include Path::pragma("src/frontend/bundle.php");
+			include Path::vegvisir("src/frontend/bundle.php");
 		}
 	}
