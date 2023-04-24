@@ -118,7 +118,7 @@ class Navigation {
 			});
 		}
 
-		return url.toString();
+		return url;
 	}
 
 	// Extract URL and target from received event
@@ -224,10 +224,10 @@ class Navigation {
 				this.setTargetHtml(target, body);
 				this.dispatchEvents(Navigation.events.LOADED, target);
 
-				// Target is a valid top navigation, do some stuff
+				// Navigation target is the main element
 				if (target === this.main) {
-					// Add loaded URL to history
-					this.historyPush(finalUrl);
+					// Add final URL to history and carry anchor from requested URL if provided
+					this.historyPush(finalUrl + url.hash);
 				}
 				
 				resolve(event.data);
