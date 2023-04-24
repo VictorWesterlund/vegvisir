@@ -217,8 +217,8 @@ class Navigation {
 		return await new Promise((resolve) => {
 			this.worker.addEventListener("message", (event) => {
 				clearTimeout(waiting);
-				// We're only interested in the page body
-				const [body] = event.data;
+				// Get navigation details from Worker
+				const [body, status, finalUrl] = event.data;
 
 				// Update DOM and resolve this and outer Promise
 				this.setTargetHtml(target, body);
@@ -227,7 +227,7 @@ class Navigation {
 				// Target is a valid top navigation, do some stuff
 				if (target === this.main) {
 					// Add loaded URL to history
-					this.historyPush(url);
+					this.historyPush(finalUrl);
 				}
 				
 				resolve(event.data);
