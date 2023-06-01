@@ -36,3 +36,8 @@
 	if (file_exists(Path::root(Path::ENV_INI))) {
 		$_ENV = array_merge($_ENV, parse_ini_file(Path::root(Path::ENV_INI), true));
 	}
+
+	// Load composer dependencies from userspace if exists
+	if (file_exists(Path::root(Path::COMPOSER_AUTOLOAD))) {
+		require_once Path::root(Path::COMPOSER_AUTOLOAD);
+	}
