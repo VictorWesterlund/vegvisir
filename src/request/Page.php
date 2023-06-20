@@ -1,5 +1,14 @@
 <?php
 
+	/*
+		NOTE: This file intentionally lacks a namespace
+		This is to make asset imports with "Page" less verbose in userspace
+		with no need to declare "use" on every page.
+	*/
+
+	use \Vegvisir\ENV;
+	use \Vegvisir\Path;
+
 	// Library used to minify JS and CSS
 	use MatthiasMullie\Minify;
 
@@ -13,7 +22,7 @@
 		public function __construct(string $page = null) {
 			// Return specific page if the Vegvisir "nav header" is detected, else return the app shell which in turn
 			// should spin up a Navigation to the requested specific page.
-			$page = !empty($_SERVER[$this::VEGVISIR_NAV_HEADER]) ? $page : $_ENV[Path::ENV_NS]["page_document"];
+			$page = !empty($_SERVER[$this::VEGVISIR_NAV_HEADER]) ? $page : ENV::get("page_document");
 
 			// Return the requested page
 			$this::include($page);
@@ -24,18 +33,18 @@
 			http_response_code($code);
 
 			// No custom error page is defined, just exit here
-			if (!in_array("error_page_path", array_keys($_ENV[Path::ENV_NS]))) {
+			if (!in_array("error_page_path", array_keys(ENV::get("NS")))) {
 				exit();
 			}
 			
 			// Put error code into environment variable so the custom error page can access it if desired
-			$_ENV[Path::ENV_NS][Page::HTTP_ERROR] = $code;
+			ENV::set(Page::HTTP_ERROR, $code);
 
 			include Path::root(
 				// Append .php extension if omitted
-				substr($_ENV[Path::ENV_NS]["error_page_path"], -4) === ".php" 
-					? $_ENV[Path::ENV_NS]["error_page_path"]
-					: $_ENV[Path::ENV_NS]["error_page_path"] . ".php"
+				substr(ENV::get("error_page_path"), -4) === ".php" 
+					? ENV::get("error_page_path")
+					: ENV::get("error_page_path") . ".php"
 			);
 		}
 
@@ -106,7 +115,7 @@
 		// Include external PHP file from user site into the current document
 		public static function include(string $name) {
 			// Rewrite empty path and "/" to page_index
-			$name = !empty($name) && $name !== "/" ? $name : $_ENV[Path::ENV_NS]["page_index"];
+			$name = !empty($name) && $name !== "/" ? $name : ENV::get("page_index");
 
 			// Attempt to load from user content pages
 			$file = Path::root("pages/${name}.php");
