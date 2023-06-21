@@ -1,30 +1,29 @@
-# Vegvisir
+<p align="center">
+<img src="https://github.com/VictorWesterlund/vegvisir/assets/35688133/4c33189e-eb70-4dab-82ae-8f0f404e1a0a"
+</p>
+<h1 align="center">Vegvisir</h1>
+<p align="center">Vegvisir offers a powerful solution for building high-performance, user-friendly websites with efficient navigation and a streamlined development process.</p>
 
-**Vegvisir offers a powerful solution for building high-performance, user-friendly websites with efficient navigation and a streamlined development process.**
+----
 
-**TLDR;**
+Vegvisir is a powerful web framework written in PHP and JavaScript that simplifies the development of dynamic and responsive websites. This framework focuses on providing seamless navigation between pages using soft navigation techniques, while utilizing an efficient Multi-Page Application (MPA) file structure. Vegvisir also offers the capability to import and minify JavaScript and CSS assets specific to each page, optimizing performance and reducing loading times.
 
-Overall, Vegvisir is a great choice for developers who are looking for a lightweight, efficient solution that can handle navigation and interaction without the added complexity of larger frameworks. Whether you're building a simple website or a more complex web application, this framework offers the core functionality you need to get the job done quickly and easily.
+**Please note that Vegvisir does not come bundled with built-in database, mail, or other utilities. It focuses specifically on the navigation and interaction layer of your web application. You can easily integrate Vegvisir with your preferred database and mail libraries or services to handle these functionalities as per your project requirements.**
 
 ![meme](https://user-images.githubusercontent.com/35688133/204326222-236a71be-5ea3-4653-8caa-6f6cfcd0d0d6.png)
 
-***Vegvisir is not this***
+**Vegvisir is not this kind of framework.**
 
----
+# Key Features
 
-This web framework is designed to provide a seamless user experience by allowing for fast and efficient navigation between different pages within a website. Using a Single Page Application (SPA) architecture, the framework enables smooth transitions between pages without having to reload the entire page.
+- **Soft navigation**: Vegvisir emphasizes soft navigation between pages, enabling smooth and seamless transitions for a more engaging user experience. This approach eliminates the need for full page reloads, resulting in faster navigation and reduced data consumption.
+- **MPA File Structure**: The framework adopts a Multi-Page Application (MPA) file structure, organizing your website into separate pages. This structure enhances code organization and maintainability, allowing developers to work on individual pages without affecting the rest of the application.
+- **Dynamic Asset Import**: Vegvisir simplifies the management of JavaScript and CSS assets by providing a mechanism to import and minify assets on a per-page basis. This ensures that only the necessary assets are loaded for each page, optimizing performance and reducing bandwidth usage.
+- **Server-side and Client-side Rendering**: Vegvisir supports both server-side and client-side rendering, allowing developers to choose the rendering approach that best suits their project. Whether you prefer server-rendered pages for optimal performance or client-side rendering for interactivity, Vegvisir offers flexibility to meet your needs.
 
-Additionally, Vegvisir utilizes a Multi-Page Application (MPA) file structure, which provides a logical organization of website files and simplifies the development process. By breaking up the website into smaller, modular components, developers can more easily manage and maintain their codebase.
+# Documentation
 
-Furthermore, Vegvisir is built to support multithreaded navigation using Workers, which allows for faster page loading times and better overall performance.
-
-Vegvisir is designed to be lightweight and efficient. Rather than including a broad range of tools and features, the framework is specifically tailored to handle website navigation and user interaction, allowing developers to build and customize their website as needed.
-
-By only including the core functionality needed for navigation and interaction, Vegvisir offers a number of benefits over other, more complex web frameworks. For one, it is much simpler to use and understand, making it ideal for beginners and developers who don't need or want all the bells and whistles of a larger framework.
-
-# Usage
-
-[Documentation on the Vegvisir Wiki](https://github.com/VictorWesterlund/vegvisir/wiki)
+For detailed instructions, code examples, and further exploration of Vegvisir's features, [please refer to the official documentation](https://github.com/victorwesterlund/vegvisir/wiki). The documentation provides comprehensive guides, syntax references, and best practices to assist you in leveraging the full potential of the framework.
 
 # Installation
 
@@ -43,6 +42,8 @@ By only including the core functionality needed for navigation and interaction, 
 
 Version|Support
 --|--
-\>8.0|✅
-7.4-8.0|✅👎 Depricated
-<7.4|❌
+PHP \>= 8.0|✅
+
+# License
+
+Vegvisir Web Framework is free and open-source software released under the GNU GPLv3 License. [See the LICENSE file for more details](https://github.com/VictorWesterlund/vegvisir/blob/master/LICENSE)
