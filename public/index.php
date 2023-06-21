@@ -1,8 +1,10 @@
 <?php
 
-	require_once "../src/Init.php";
-	require_once Path::vegvisir("src/request/Router.php");
+	use \Vegvisir\Path;
+	use \Vegvisir\Request\Router;
 
-	// Start the request processor. This is how Vegvisir gets initialized
-	// from an HTTP request.
+	require_once "../src/Init.php";
+
+	// Start Vegvisir request processing
+	require_once Path::vegvisir("src/request/Router.php");
 	(new Router());

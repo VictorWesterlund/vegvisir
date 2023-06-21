@@ -1,5 +1,11 @@
 <?php
 
+	namespace Vegvisir\Request;
+
+	use \Page;
+	use \Vegvisir\ENV;
+	use \Vegvisir\Path;
+
 	require_once Path::vegvisir("src/request/Page.php");
 
 	enum StaticPathRegex: string {
@@ -37,7 +43,7 @@
 
 		private function get_requested_path(): string {
 			// Requests to root of user content path should be rewritten to configured index page
-			$path = $this->path !== "/" ? $this->path : $_ENV[Path::ENV_NS]["page_index"];
+			$path = $this->path !== "/" ? $this->path : ENV::get("page_index");
 
 			// Strip leading slash
 			if (strpos($this->path, "/") === 0) {
