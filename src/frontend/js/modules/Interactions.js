@@ -1,6 +1,5 @@
 // Event binder and handler for interactive elements
 class Interactions {
-
 	// Default options object used when constructing this class
 	static options = {
 		autoBind: true,

@@ -16,5 +16,5 @@
     // Turn vars into a CSV string
     $vars = implode(",", $vars);
 
-    // Return generated JS
-    echo "globalThis." . ENV::get("NS") . " = {{$vars}};";
+    // Put environment varibles as object on globalThis
+    echo "globalThis." . strtolower(ENV::NS) . " = {{$vars}};";

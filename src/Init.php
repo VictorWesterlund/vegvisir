@@ -9,7 +9,7 @@
 	class ENV {
         // Vegvisir environment variables are placed in $_ENV as an assoc array with this as the array key.
         // Example: $_ENV[self::NS][<vegvisir_env_var>]
-        private const NS = "_VEGVISIR";
+        public const NS = "_VEGVISIR";
 
 		// Name of the .ini file containing environment variables to be loaded (internal and userspace)
 		private const INI = ".env.ini";
@@ -48,22 +48,14 @@
 			}
 
 			// Load composer dependencies from userspace if exists
-			if (file_exists(Path::root(Path::COMPOSER_AUTOLOAD))) {
-				require_once Path::root(Path::COMPOSER_AUTOLOAD);
+			if (file_exists(Path::root(self::COMPOSER_AUTOLOAD))) {
+				require_once Path::root(self::COMPOSER_AUTOLOAD);
 			}
 		}
     }
 
 	// Global paths
 	class Path {
-		// Name of the environment variable files
-		const ENV_INI = ".env.ini";
-		// Namespace to store env variables in the $_ENV superglobal.
-		// Variables exported to JavaScript will also have this namespace on the globalThis
-		const ENV_NS = "_vegvisir";
-		// Path to composer autoload script
-		const COMPOSER_AUTOLOAD = "vendor/autoload.php";
-
 		// Get root of Vegvisir installation for accesing framework files
 		public static function vegvisir(string $crumbs = ""): string {
 			return dirname(__DIR__) . "/" . $crumbs;
