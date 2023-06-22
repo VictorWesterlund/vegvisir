@@ -33,7 +33,7 @@
 			http_response_code($code);
 
 			// No custom error page is defined, just exit here
-			if (!in_array("error_page_path", array_keys(ENV::get("NS")))) {
+			if (!ENV::isset("error_page_path")) {
 				exit();
 			}
 			
