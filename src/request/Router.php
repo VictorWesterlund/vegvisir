@@ -14,6 +14,8 @@
 	}
 
 	class Router {
+		private string $path;
+
 		public function __construct() {
 			// Get pathname from request URI
 			$this->path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
