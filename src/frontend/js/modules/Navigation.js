@@ -12,14 +12,14 @@ class Navigation {
 		// Push navigation of this.main onto the history session stack
 		pushHistory: true,
 		// Merge search parameters from current page with new ones from navigation
-		carrySearchParams: false
+		carrySearchParams: false,
+		// Fetch page with initial HTTP request method, and also carry POST data
+		carryRequestMethod: false
 	}
 
 	constructor(source, options = {}) {
 		// Spin up dedicated worker
 		this.worker = new Worker("/_vegvisir_wrkr/NavigationWorker.js");
-		// Listen for status messages from worker
-		this.worker.addEventListener("message", event => this.messageHandler(event));
 
 		// Merge default options with overrides
 		this.options = {};
@@ -162,12 +162,6 @@ class Navigation {
 		this.navigate(target);
 	}
 
-	// Handle generic messages from Worker
-	messageHandler(event) {
-		// Nothing here yet
-		return;
-	}
-
 	// Emit a loading/loaded event on window and target
 	dispatchEvents(name, target = null) {
 		// Emit "loading" or "loaded" event depending on truthiness of loading variable
@@ -206,8 +200,14 @@ class Navigation {
 			target = document.querySelector(target);
 		}
 
-		// Tell Worker to fetch page
-		this.worker.postMessage(this.url.toString());
+		console.log(globalThis._vegvisir);
+
+		// Fetch page and pass options and exposed environment variables
+		this.worker.postMessage({
+			options: this.options,
+			vars: globalThis._vegvisir,
+			url: this.url.toString()
+		});
 
 		const waitingDelay = 5000;
 		// Dispatch Navigation.events.WAITING after waitingDelay timeout reached
