@@ -10,9 +10,12 @@ class NavigationWorker {
 		// Append request method if carryRequestMethod flag is set
 		if (request.options.carryRequestMethod) {
 			this.options.method = request.vars.initial_method;
-			this.options.body = request.vars.post_data;
 
-			// TODO: Content type
+			// Append JSON request body if request is not GET or HEAD
+			if (!["GET", "HEAD"].includes(request.vars.initial_method.toUpperCase())) {
+				this.options.body = request.vars.post_data;
+				this.options.headers["Content-Type"] = "application/json";
+			}
 		}
 
 		this.getPage(request.url);

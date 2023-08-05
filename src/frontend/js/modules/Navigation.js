@@ -200,8 +200,6 @@ class Navigation {
 			target = document.querySelector(target);
 		}
 
-		console.log(globalThis._vegvisir);
-
 		// Fetch page and pass options and exposed environment variables
 		this.worker.postMessage({
 			options: this.options,

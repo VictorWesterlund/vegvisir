@@ -19,28 +19,19 @@
 
         public function __construct() {
             // Resolve environment variables from constant and append to export array
-            $this->append_vars(array_combine(self::ENV, array_map(
+            $this->vars = array_combine(self::ENV, array_map(
                 fn(string $key): string => ENV::get($key), 
                 self::ENV)
-            ));
+            );
 
             // Expose initial request method as string. This is used on initial load to pass along the request method to 
-            $this->append_vars(["initial_method" => $_SERVER["REQUEST_METHOD"]]);
-
+            $this->vars["initial_method"] = $_SERVER["REQUEST_METHOD"];
             // Append POST data as stringified JSON to export array
-            $this->append_vars(["post_data" => htmlspecialchars(json_encode($_POST))]);
-        }
-
-        private function append_vars(array $vars) {
-            $this->vars = array_merge($this->vars, array_map(
-                fn(string $k, string $v): string => "{$k}:\"{$v}\"",
-                array_keys($vars),
-                array_values($vars)
-            ));
+            $this->vars["post_data"] = json_encode($_POST);
         }
 
         // Get JSON from $this->vars
         public function json() {
-            return "{" . implode(",", $this->vars) . "}";
+            return json_encode($this->vars);
         }
     }
