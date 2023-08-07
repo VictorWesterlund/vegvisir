@@ -1,10 +1,27 @@
 class NavigationWorker {
-	constructor(event) {
-		this.event = event;
+	constructor(request) {
+		this.options = {
+			// Tell the backend we only want page content, no app shell
+			headers: {
+				"X-Vegvisir-Navigation": true
+			}
+		};
 
-		this.getPage();	
+		// Append request method if carryRequestMethod flag is set
+		if (request.options.carryRequestMethod) {
+			this.options.method = request.vars.initial_method;
+
+			// Append JSON request body if request is not GET or HEAD
+			if (!["GET", "HEAD"].includes(request.vars.initial_method.toUpperCase())) {
+				this.options.body = request.vars.post_data;
+				this.options.headers["Content-Type"] = "application/json";
+			}
+		}
+
+		this.getPage(request.url);
 	}
 
+	// Send response back to initator thread
 	async send(response) {
 		return response instanceof Response 
 			// Return page as plaintext along with the response HTTP status and the fetched URL
@@ -14,18 +31,11 @@ class NavigationWorker {
 	}
 
 	// Request page from back-end
-	async getPage() {
-		await this.send(
-			await fetch(new Request(this.event.data, {
-				headers: {
-					// Tell the backend we only want page content, no app shell
-					"X-Vegvisir-Navigation": true
-				}
-			}))
-		);
-
+	async getPage(url) {
+		// Fetch page from URL with options
+		await this.send(await fetch(new Request(url, this.options)));
 		globalThis.close();
 	}
 }
 
-globalThis.addEventListener("message", event => new NavigationWorker(event));
+globalThis.addEventListener("message", event => new NavigationWorker(event.data));

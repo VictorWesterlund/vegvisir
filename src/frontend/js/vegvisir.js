@@ -12,7 +12,9 @@ globalThis.vegvisir = {
 // Fetch requested page on initial load
 globalThis.vegvisir.Navigation(window.location.pathname.length > 1 ? window.location.pathname : globalThis._vegvisir.page_index, {
 	// We want search parameters on initial load to be passed to requested page
-	carrySearchParams: true
+	carrySearchParams: true,
+	// We also want the page loaded to receive POST parameters etc.
+	carryRequestMethod: true
 })
 // Navigate the root element defined in Vegvisir env file
 .navigate(document.querySelector(globalThis._vegvisir.selector_main_element));

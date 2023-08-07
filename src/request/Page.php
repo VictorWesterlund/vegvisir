@@ -60,13 +60,13 @@
 			}
 
 			// Attempt to read asset from user site first
-			$path = Path::root("assets/${folder}/${file}");
+			$path = Path::root("assets/{$folder}/{$file}");
 			if (is_file($path)) {
 				return $path;
 			}
 
 			// Default to framework static asset if no user site asset found
-			return Path::vegvisir("src/frontend/${folder}/${file}");
+			return Path::vegvisir("src/frontend/{$folder}/{$file}");
 		}
 
 		// These functions are exposed to all pages. They can be called
@@ -118,7 +118,7 @@
 			$name = !empty($name) && $name !== "/" ? $name : ENV::get("page_index");
 
 			// Attempt to load from user content pages
-			$file = Path::root("pages/${name}.php");
+			$file = Path::root("pages/{$name}.php");
 
 			if (!is_file($file)) {
 				return Page::error(404);

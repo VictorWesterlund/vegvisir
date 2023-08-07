@@ -20,6 +20,11 @@
 			// Get pathname from request URI
 			$this->path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
+			// Request has a body, attempt to parse it into $_POST
+			if (in_array("HTTP_CONTENT_TYPE", array_keys($_SERVER))) {
+				$this->parse_request_body();
+			}
+
 			// Perform request routing
 			switch ($this->path) {
 				// Get static asset from user content
@@ -40,6 +45,14 @@
 				// Pass request to Page() initializer
 				default:
 					return new Page($this->get_requested_path());
+			}
+		}
+
+		// Parse request body into $_POST superglobal
+		private static function parse_request_body() {
+			// Polyfill for loading JSON from request body into $_POST
+			if ($_SERVER["HTTP_CONTENT_TYPE"] === "application/json") {
+				$_POST = json_decode(file_get_contents("php://input"), true) ?? [];
 			}
 		}
 
