@@ -92,7 +92,8 @@ class Navigation {
 				tag.setAttribute(attribute, script.getAttribute(attribute));
 			}
 			
-			tag.innerHTML = `{${script.innerText}}`;
+			// Scope imported JS by default unless the data-noscope is explicitly defined
+			tag.innerHTML = !"noscope" in tag.dataset ? `{${script.innerText}}` : script.innerHTML;
 
 			script.remove();
 			target.appendChild(tag);
