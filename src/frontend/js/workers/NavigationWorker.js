@@ -18,7 +18,7 @@ class NavigationWorker {
 			}
 		}
 
-		this.getPage(request.url);
+		this.getPage(new URL(request.url));
 	}
 
 	// Send response back to initator thread
@@ -33,7 +33,7 @@ class NavigationWorker {
 	// Request page from back-end
 	async getPage(url) {
 		// Fetch page from URL with options
-		await this.send(await fetch(new Request(url, this.options)));
+		await this.send(await fetch(new Request(url.pathname, this.options)));
 		globalThis.close();
 	}
 }
