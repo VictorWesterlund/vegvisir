@@ -1,6 +1,11 @@
 class NavigationWorker {
 	constructor(request) {
-		this.options = {
+		// Parse URL form string into URL object
+		this.url = new URL(request.url);
+		// Expose request options as property
+		this.options = request.options;
+
+		this.fetchOptions = {
 			// Tell the backend we only want page content, no app shell
 			headers: {
 				"X-Vegvisir-Navigation": true
@@ -8,17 +13,17 @@ class NavigationWorker {
 		};
 
 		// Append request method if carryRequestMethod flag is set
-		if (request.options.carryRequestMethod) {
+		if (this.options.carryRequestMethod) {
 			this.options.method = request.vars.initial_method;
 
 			// Append JSON request body if request is not GET or HEAD
 			if (!["GET", "HEAD"].includes(request.vars.initial_method.toUpperCase())) {
-				this.options.body = request.vars.post_data;
-				this.options.headers["Content-Type"] = "application/json";
+				this.fetchOptions.body = request.vars.post_data;
+				this.fetchOptions.headers["Content-Type"] = "application/json";
 			}
 		}
 
-		this.getPage(request.url);
+		this.getPage();
 	}
 
 	// Send response back to initator thread
@@ -31,9 +36,17 @@ class NavigationWorker {
 	}
 
 	// Request page from back-end
-	async getPage(url) {
+	async getPage() {
+		// Fetch URL by pathname and carry search parameters
+		let url = this.url.pathname;
+
+		// Carry search parameters if flag is set
+		if (this.options.carrySearchParams) {
+			url = url + this.url.search;
+		}
+		
 		// Fetch page from URL with options
-		await this.send(await fetch(new Request(url, this.options)));
+		await this.send(await fetch(new Request(url, this.fetchOptions)));
 		globalThis.close();
 	}
 }
