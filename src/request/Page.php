@@ -69,6 +69,23 @@
 			return Path::vegvisir("src/frontend/{$folder}/{$file}");
 		}
 
+		// Return namespace folder for multi-language pages
+		private static function get_i18n_namespace(): string {
+			// Multi-language support is disabled
+			if (!ENV::get("i18n")) {
+				return "";
+			}
+
+			// Extract hostname and port from request
+			[$hostname, $port] = explode(":", $_SERVER["HTTP_HOST"], 1);
+
+			// Return page namespace for domain defiend
+			return array_key_exists($hostname, ENV::get("i18n"))
+				? ENV::get("i18n")[$hostname]
+				// Else return first entry as default if domain not in i18n array
+				: ENV::get("i18n")[0];
+		}
+
 		// These functions are exposed to all pages. They can be called
 		// with the static reference Page::<method> anywhere on the page.
 
@@ -116,9 +133,10 @@
 		public static function include(string $name) {
 			// Rewrite empty path and "/" to page_index
 			$name = !empty($name) && $name !== "/" ? $name : ENV::get("page_index");
+			$i18n = self::get_i18n_namespace();
 
 			// Attempt to load from user content pages
-			$file = Path::root("pages/{$name}.php");
+			$file = Path::root("pages/{$i18n}{$name}.php");
 
 			if (!is_file($file)) {
 				return Page::error(404);
