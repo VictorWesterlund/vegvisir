@@ -73,17 +73,19 @@
 		private static function get_i18n_namespace(): string {
 			// Multi-language support is disabled
 			if (!ENV::get("i18n")) {
-				return "";
+				return "/";
 			}
 
 			// Extract hostname and port from request
-			[$hostname, $port] = explode(":", $_SERVER["HTTP_HOST"], 1);
+			[$hostname] = explode(":", $_SERVER["HTTP_HOST"], 2);
 
-			// Return page namespace for domain defiend
-			return array_key_exists($hostname, ENV::get("i18n"))
+			$namespace = array_key_exists($hostname, ENV::get("i18n"))
 				? ENV::get("i18n")[$hostname]
 				// Else return first entry as default if domain not in i18n array
 				: ENV::get("i18n")[0];
+
+			// Return page namespace for domain defiend
+			return "/{$namespace}/";
 		}
 
 		// These functions are exposed to all pages. They can be called
@@ -136,7 +138,7 @@
 			$i18n = self::get_i18n_namespace();
 
 			// Attempt to load from user content pages
-			$file = Path::root("pages/{$i18n}{$name}.php");
+			$file = Path::root("pages{$i18n}{$name}.php");
 
 			if (!is_file($file)) {
 				return Page::error(404);
