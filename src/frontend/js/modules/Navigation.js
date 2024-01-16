@@ -1,5 +1,7 @@
 // Multi-threaded SPA navigation handler
 class Navigation {
+	static WORKER_PATHNAME = "/_vegvisir_wrkr/NavigationWorker.js";
+
 	// Enum of available Event names that can be dispatched
 	static events = {
 		LOADED: "vegvisirloaded",
@@ -19,7 +21,7 @@ class Navigation {
 
 	constructor(source, options = {}) {
 		// Spin up dedicated worker
-		this.worker = new Worker("/_vegvisir_wrkr/NavigationWorker.js");
+		this.worker = new Worker(Navigation.WORKER_PATHNAME);
 
 		// Merge default options with overrides
 		this.options = {};

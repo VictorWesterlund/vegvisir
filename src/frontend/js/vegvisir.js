@@ -3,14 +3,14 @@
 // present in the same scope duing initialization.
 
 // Functions and classes accessible by all scripts
-globalThis.vegvisir = {
+globalThis.vv = {
 	// Bind core features to global scope
 	Interactions: (...args) => new Interactions(...args),
 	Navigation: (...args) => new Navigation(...args)
 };
 
 // Fetch requested page on initial load
-globalThis.vegvisir.Navigation(window.location.pathname.length > 1 ? window.location.pathname : globalThis._vegvisir.page_index, {
+globalThis.vv.Navigation(window.location.pathname.length > 1 ? window.location.pathname : globalThis._vegvisir.page_index, {
 	// We want search parameters on initial load to be passed to requested page
 	carrySearchParams: true,
 	// We also want the page loaded to receive POST parameters etc.

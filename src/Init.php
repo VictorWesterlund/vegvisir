@@ -9,7 +9,7 @@
 	class ENV {
         // Vegvisir environment variables are placed in $_ENV as an assoc array with this as the array key.
         // Example: $_ENV[self::NS][<vegvisir_env_var>]
-        public const NS = "_VEGVISIR";
+        public const NS = "_vv_env";
 
 		// Name of the .ini file containing environment variables to be loaded (internal and userspace)
 		private const INI = ".env.ini";
@@ -64,11 +64,6 @@
 		// Get root of user site folder
 		public static function root(string $crumbs = ""): string {
 			return ENV::get("site_path") . "/" . $crumbs;
-		}
-
-		// List the files and folders in directory (without the dots on Linux)
-		public static function ls(string $path): array|bool {
-			return array_diff(scandir($path), ["..", "."]);
 		}
 	}
 
