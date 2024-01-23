@@ -1,5 +1,5 @@
 // Event binder and handler for interactive elements
-class Interactions {
+globalThis.vv.Interactions = class Interactions {
 	// Default options object used when constructing this class
 	static options = {
 		autoBind: true,
@@ -12,7 +12,7 @@ class Interactions {
 		this.methods = {
 			nav: (event) => {
 				event.preventDefault();
-				new Navigation(event);
+				new vv.Navigation(event);
 			},
 			void: () => {}
 		}
@@ -35,7 +35,7 @@ class Interactions {
 
 	// Bind interactive components to an element
 	bind(element) {
-		let action = element.getAttribute("vv-do");
+		let action = element.getAttribute("vv-call");
 
 		// Call method with value of "vv-do" attribute if defiend
 		if (action !== null) {
@@ -56,7 +56,7 @@ class Interactions {
 
 	// Find and bind all Vegvisir interactive elements in scope
 	bindAll() {
-		const elements = [...document.querySelectorAll(`[vv-ns="${this.scope}"]`)];
+		const elements = [...document.querySelectorAll(`[vv="${this.scope}"]`)];
 		elements.forEach(element => this.bind(element));
 	}
 }

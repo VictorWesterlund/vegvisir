@@ -2,15 +2,15 @@
 
 	namespace Vegvisir\Request;
 
-	use \Page;
+	use \VV as Page;
 	use \Vegvisir\ENV;
 	use \Vegvisir\Path;
 
-	require_once Path::vegvisir("src/request/Page.php");
+	require_once Path::vegvisir("src/request/VV.php");
 
 	enum StaticPathRegex: string {
-		case ASSET  = "/^\/assets\/*/";
-		case WORKER = "/^\/_vegvisir_wrkr\/*/"; // "Vegvisir worker"
+		case ASSETS  = "/^\/assets\/*/";
+		case WORKER = "/^\/_vv\/*/"; // "Vegvisir worker"
 	}
 
 	class Router {
@@ -28,11 +28,11 @@
 			// Perform request routing
 			switch ($this->path) {
 				// Get static asset from user content
-				case (preg_match(StaticPathRegex::ASSET->value, $this->path) ? true : false):
+				case ((bool) preg_match(StaticPathRegex::ASSETS->value, $this->path)):
 					return $this->asset();
 				
 				// Return script to be run in a JS Worker
-				case (preg_match(StaticPathRegex::WORKER->value, $this->path) ? true : false):
+				case ((bool) preg_match(StaticPathRegex::WORKER->value, $this->path)):
 					return $this->worker();
 
 				// Ignore requests to /favicon.ico which sometimes gets sent automatically
@@ -58,7 +58,7 @@
 
 		private function get_requested_path(): string {
 			// Requests to root of user content path should be rewritten to configured index page
-			$path = $this->path !== "/" ? $this->path : ENV::get("page_index");
+			$path = $this->path !== "/" ? $this->path : ENV::get(ENV::INDEX);
 
 			// Strip leading slash
 			if (strpos($this->path, "/") === 0) {

@@ -13,10 +13,9 @@
     // Include export of select Vegvisir environment variables
     include Path::vegvisir("src/frontend/env.php");
 
-    // Expose exported variables on globalThis as a JavaScript object
-    echo "globalThis." . ENV::NS . " = " . (new ExportVariables())->json() . ";";
-
 ?>
-<?= Page::js(Path::vegvisir("src/frontend/js/modules/Navigation.js"), false) ?>
-<?= Page::js(Path::vegvisir("src/frontend/js/modules/Interactions.js"), false) ?>
-<?= Page::js(Path::vegvisir("src/frontend/js/vegvisir.js"), false) ?>
+<?= ";globalThis.vv = {};" ?>
+<?= "globalThis.vv._env = " . (new ExportVariables())->json() . ";" ?>
+<?= VV::js(Path::vegvisir("src/frontend/js/modules/Navigation.js"), false) . ";" ?>
+<?= VV::js(Path::vegvisir("src/frontend/js/modules/Interactions.js"), false) . ";" ?>
+<?= VV::js(Path::vegvisir("src/frontend/js/vegvisir.js"), false) ?>

@@ -8,21 +8,19 @@
 
     class ExportVariables {
         // Sequential array of JSON formatted strings with property name and values
-        private array $vars = [];
+        protected array $vars;
 
         // Export these variables from $_ENV
-        private const ENV = [
-            "selector_main_element",
-            "page_document",
-            "page_index"
+        protected const ENV = [
+            ENV::MAIN,
+            ENV::INDEX,
+            ENV::DOCUMENT
         ];
 
         public function __construct() {
-            // Resolve environment variables from constant and append to export array
-            $this->vars = array_combine(self::ENV, array_map(
-                fn(string $key): string => ENV::get($key), 
-                self::ENV)
-            );
+            foreach (self::ENV as $env) {
+                $this->vars[$env->name] = ENV::GET($env);
+            }
 
             // Expose initial request method as string. This is used on initial load to pass along the request method to 
             $this->vars["initial_method"] = $_SERVER["REQUEST_METHOD"];

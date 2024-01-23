@@ -1,23 +1,15 @@
 // Vegvisir frontend initializer.
-// This script depends on "./Interactions.js" and "./Navigation.js" being
-// present in the same scope duing initialization.
-
-// Functions and classes accessible by all scripts
-globalThis.vv = {
-	// Bind core features to global scope
-	Interactions: (...args) => new Interactions(...args),
-	Navigation: (...args) => new Navigation(...args)
-};
+// This script depends on "./Interactions.js" and "./Navigation.js" being present in the same scope duing initialization.
 
 // Fetch requested page on initial load
-globalThis.vv.Navigation(window.location.pathname.length > 1 ? window.location.pathname : globalThis._vegvisir.page_index, {
+new globalThis.vv.Navigation(window.location.pathname.length > 1 ? window.location.pathname : globalThis.vv._env.INDEX, {
 	// We want search parameters on initial load to be passed to requested page
 	carrySearchParams: true,
 	// We also want the page loaded to receive POST parameters etc.
 	carryRequestMethod: true
 })
 // Navigate the root element defined in Vegvisir env file
-.navigate(document.querySelector(globalThis._vegvisir.selector_main_element));
+.navigate(document.querySelector(globalThis.vv._env.MAIN));
 
 // Handle browser back/forward buttons
 window.addEventListener("popstate", (event) => {
@@ -32,6 +24,6 @@ window.addEventListener("popstate", (event) => {
 	event.state.options.pushHistory = false;
 	
 	if ("url" in event.state) {
-		return globalThis.vegvisir.Navigation(event.state.url, event.state.options).navigate();
+		return new globalThis.vv.Navigation(event.state.url, event.state.options).navigate();
 	}
 });
