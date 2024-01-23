@@ -1,17 +1,17 @@
 <?php 
 
-    /*
-        This file generates a minified bundle of all resources loaded with Path::init()
-        These are JavaScript files that are required to run the Vegvisir front-end and
-        and is loaded once.
-    */
+	/*
+		This file generates a minified bundle of all resources loaded with Path::init()
+		These are JavaScript files that are required to run the Vegvisir front-end and
+		and is loaded once.
+	*/
 
-    use \Vegvisir\ENV;
-    use \Vegvisir\Path;
-    use \Vegvisir\Frontend\ExportVariables;
+	use \Vegvisir\ENV;
+	use \Vegvisir\Path;
+	use \Vegvisir\Frontend\ExportVariables;
 
-    // Include export of select Vegvisir environment variables
-    include Path::vegvisir("src/frontend/env.php");
+	// Include export of select Vegvisir environment variables
+	include Path::vegvisir("src/frontend/env.php");
 
 ?>
 <?= ";globalThis.vv = {};" ?>

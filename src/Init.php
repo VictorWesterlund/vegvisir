@@ -10,20 +10,20 @@
 
 	// Backed enum for all variables available in ENV::ENV_INI
 	enum ENV: string {
-        protected const NAMESPACE = "_vv";
+		protected const NAMESPACE = "_vv";
 		protected const ENV_INI = ".env.ini";
 		protected const COMPOSER = "vendor/autoload.php";
 
-        case SITE         = "site_path";
-        case MAIN         = "selector_main_element";
-        case DOCUMENT     = "page_document";
-        case INDEX        = "page_index";
-        case ERROR_PAGE   = "error_page_path";
+		case SITE         = "site_path";
+		case MAIN         = "selector_main_element";
+		case DOCUMENT     = "page_document";
+		case INDEX        = "page_index";
+		case ERROR_PAGE   = "error_page_path";
 
-        // Returns true if Reflect environment variable is present and not empty in 
-        public static function isset(ENV $key): bool {
-            return in_array($key->value, array_keys($_ENV[self::NAMESPACE])) && !empty($_ENV[self::NAMESPACE][$key->value]);
-        }
+		// Returns true if Reflect environment variable is present and not empty in 
+		public static function isset(ENV $key): bool {
+			return in_array($key->value, array_keys($_ENV[self::NAMESPACE])) && !empty($_ENV[self::NAMESPACE][$key->value]);
+		}
 
 		// Get environment variable by key
 		public static function get(ENV $key): mixed {
@@ -53,7 +53,7 @@
 				require_once Path::root(self::COMPOSER);
 			}
 		}
-    }
+	}
 
 	// Global paths
 	class Path {
