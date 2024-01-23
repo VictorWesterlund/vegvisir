@@ -1,10 +1,13 @@
 // Multi-threaded SPA navigation handler
-class Navigation {
+globalThis.vv.Navigation = class Navigation {
+	static WORKER_PATHNAME = "/_vv/Navigate.js";
+
 	// Enum of available Event names that can be dispatched
 	static events = {
-		LOADED: "vegvisirloaded",
-		LOADING: "vegvisirloading",
-		WAITING: "vegvisirwaiting"
+		STARTED: "NavigateStartedEvent",
+		LOADED: "NavigateLoadedEvent",
+		LOADING: "NavigateLoadingEvent",
+		ABORTED: "NavigateAbortedEvent"
 	}
 
 	// Default options object used when constructing this class
@@ -19,7 +22,7 @@ class Navigation {
 
 	constructor(source, options = {}) {
 		// Spin up dedicated worker
-		this.worker = new Worker("/_vegvisir_wrkr/NavigationWorker.js");
+		this.worker = new Worker(Navigation.WORKER_PATHNAME);
 
 		// Merge default options with overrides
 		this.options = {};
@@ -29,7 +32,7 @@ class Navigation {
 		this.abortController = new AbortController();
 
 		// The root element used for top navigations (and the default target)
-		this.main = document.querySelector(globalThis._vegvisir.selector_main_element);
+		this.main = document.querySelector(globalThis.vv._env.MAIN);
 
 		// Build URL from various sources
 		switch (source.constructor) {
@@ -46,6 +49,8 @@ class Navigation {
 			default:
 				this.url = this.urlFromString(source);
 		}
+
+		this.dispatchEvent(Navigation.events.STARTED);
 	}
 
 	// Push new history session entry onto the stack
@@ -59,8 +64,8 @@ class Navigation {
 		url = url instanceof URL ? url : new URL(url);
 
 		// Navigations to page_index should be treated as root "/"
-		if (url.pathname.substring(url.pathname.length - globalThis._vegvisir.page_index.length) === globalThis._vegvisir.page_index) {
-			url.pathname = url.pathname.substring(0, url.pathname.length - globalThis._vegvisir.page_index.length);
+		if (url.pathname.substring(url.pathname.length - globalThis.vv._env.INDEX.length) === globalThis.vv._env.INDEX) {
+			url.pathname = url.pathname.substring(0, url.pathname.length - globalThis.vv._env.INDEX.length);
 		}
 
 		// Set hash from url as current anchor
@@ -79,9 +84,6 @@ class Navigation {
 	setTargetHtml(target, html) {
 		target = target instanceof HTMLElement ? target : document.querySelector(target);
 		target.innerHTML = html;
-
-		target.scrollTo(0, 0); // Reset scroll position of wrapper
-		target.parentElement.parentElement.scrollTo(0, 0); // Also reset scroll position for root element (Safari)
 
 		// Rebuild script tags as they don't execute with innerHTML per the HTML spec
 		[...target.getElementsByTagName("script")].forEach(script => {
@@ -108,7 +110,7 @@ class Navigation {
 			url = new URL(string);
 		} catch {
 			// Treat invalid URL as a relative path
-			url = new URL(window.location.origin + (string !== globalThis._vegvisir.page_index ? string : ""));
+			url = new URL(window.location.origin + (string !== globalThis.vv._env.INDEX ? string : ""));
 		}
 
 		// Carry existing top searchParams to new location
@@ -164,7 +166,7 @@ class Navigation {
 	}
 
 	// Emit a loading/loaded event on window and target
-	dispatchEvents(name, target = null) {
+	dispatchEvent(name, target = null) {
 		// Emit "loading" or "loaded" event depending on truthiness of loading variable
 		const event = new Event(name, {
 			detail: {
@@ -194,7 +196,7 @@ class Navigation {
 		// We need a local reference to the url object so the response listener can access it later
 		const url = this.url;
 
-		this.dispatchEvents(Navigation.events.LOADING, target);
+		this.dispatchEvent(Navigation.events.LOADING, target);
 
 		// Get element by CSS selector string
 		if (typeof target === "string") {
@@ -204,24 +206,19 @@ class Navigation {
 		// Fetch page and pass options and exposed environment variables
 		this.worker.postMessage({
 			options: this.options,
-			vars: globalThis._vegvisir,
+			vars: globalThis.vv._env,
 			url: this.url.toString()
 		});
-
-		const waitingDelay = 5000;
-		// Dispatch Navigation.events.WAITING after waitingDelay timeout reached
-		const waiting = setTimeout(() => this.dispatchEvents(Navigation.events.WAITING, target), waitingDelay);
 
 		// Wait for Worker to fetch page or abort if abort flag is set
 		return await new Promise((resolve) => {
 			this.worker.addEventListener("message", (event) => {
-				clearTimeout(waiting);
 				// Get navigation details from Worker
 				const [body, status, finalUrl] = event.data;
 
 				// Update DOM and resolve this and outer Promise
 				this.setTargetHtml(target, body);
-				this.dispatchEvents(Navigation.events.LOADED, target);
+				this.dispatchEvent(Navigation.events.LOADED, target);
 
 				// Navigation target is the main element
 				if (target === this.main) {

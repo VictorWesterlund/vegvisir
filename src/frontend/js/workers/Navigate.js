@@ -1,4 +1,4 @@
-class NavigationWorker {
+class Navigate {
 	constructor(request) {
 		// Parse URL form string into URL object
 		this.url = new URL(request.url);
@@ -51,4 +51,4 @@ class NavigationWorker {
 	}
 }
 
-globalThis.addEventListener("message", event => new NavigationWorker(event.data));
+globalThis.addEventListener("message", event => new Navigate(event.data));

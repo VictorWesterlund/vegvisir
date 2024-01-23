@@ -1,5 +1,5 @@
 // Event binder and handler for interactive elements
-class Interactions {
+globalThis.vv.Interactions = class Interactions {
 	// Default options object used when constructing this class
 	static options = {
 		autoBind: true,
@@ -12,7 +12,7 @@ class Interactions {
 		this.methods = {
 			nav: (event) => {
 				event.preventDefault();
-				new Navigation(event);
+				new vv.Navigation(event);
 			},
 			void: () => {}
 		}
@@ -33,40 +33,30 @@ class Interactions {
 		}
 	}
 
-	// Return default method name by element type
-	defaultActionFromType(element) {
-		switch (typeof element) {
-			case HTMLAnchorElement:
-				return "nav";
-
-			default:
-				console.warn("Vegvisir:Interactions: Undefined interaction", element);
-				return "void";
-		}
-	}
-
 	// Bind interactive components to an element
 	bind(element) {
-		// Call method when element is interacted with
-		if ("action" in element.dataset) {
+		let action = element.getAttribute("vv-call");
+
+		// Call method with value of "vv-do" attribute if defiend
+		if (action !== null) {
 			// Action requested but method name not provided, attempt to resolve from element type
-			if (element.dataset.action.length < 1) {
-				element.dataset.action = this.defaultActionFromType(element);
+			if (action.length < 1 && typeof element === HTMLAnchorElement) {
+				action = "nav";
 			}
 
 			// Call method when element is interacted with
-			element.addEventListener(this.options.eventType, event => {
-				event.stopPropagation(); // Don't bubble interaction to parent elements
-				this.methods[element.dataset.action](event);
+			element.addEventListener(this.options.eventType, (event) => {
+				event.stopPropagation();
+				this.methods[action](event);
 			});
 		}
 
 		this.elements.add(element);
 	}
 
-	// Find and bind all interactive elements on page
+	// Find and bind all Vegvisir interactive elements in scope
 	bindAll() {
-		const elements = [...document.querySelectorAll(`[data-trigger="${this.scope}"]`)];
+		const elements = [...document.querySelectorAll(`[vv="${this.scope}"]`)];
 		elements.forEach(element => this.bind(element));
 	}
 }
