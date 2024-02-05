@@ -16,8 +16,6 @@
 		// This class will look for this header to determine if we should send the env "page_document" or
 		// the contents of a specific page.
 		private const VEGVISIR_NAV_HEADER = "HTTP_X_VEGVISIR_NAVIGATION";
-		// HTTP status code environment variable name used with custom error pages
-		private const HTTP_ERROR = "http_status";
 
 		public function __construct(string $page = null) {
 			// Return specific page if the Vegvisir "nav header" is detected, else return the app shell which in turn
@@ -33,18 +31,15 @@
 			http_response_code($code);
 
 			// No custom error page is defined, just exit here
-			if (!ENV::isset("error_page_path")) {
+			if (!ENV::isset(ENV::ERROR_PAGE)) {
 				exit();
 			}
-			
-			// Put error code into environment variable so the custom error page can access it if desired
-			ENV::set(self::HTTP_ERROR, $code);
 
 			include Path::root(
 				// Append .php extension if omitted
-				substr(ENV::get("error_page_path"), -4) === ".php" 
-					? ENV::get("error_page_path")
-					: ENV::get("error_page_path") . ".php"
+				substr(ENV::get(ENV::ERROR_PAGE), -4) === ".php" 
+					? ENV::get(ENV::ERROR_PAGE)
+					: ENV::get(ENV::ERROR_PAGE) . ".php"
 			);
 		}
 

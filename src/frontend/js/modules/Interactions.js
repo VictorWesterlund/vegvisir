@@ -7,14 +7,11 @@ globalThis.vv.Interactions = class Interactions {
 		eventType: "click"
 	}
 
-	constructor(scope, methods = {}, options = {}) {
+	constructor(namespace, methods = {}, options = {}) {
 		// Default "built-in" interactions
 		this.methods = {
-			nav: (event) => {
-				event.preventDefault();
-				new vv.Navigation(event);
-			},
-			void: () => {}
+			void: ()     => {},
+			navigate: (event) => new vv.Navigation(event)
 		}
 		
 		// Merge incoming- and default interactions
@@ -24,39 +21,35 @@ globalThis.vv.Interactions = class Interactions {
 		this.options = {};
 		this.options = Object.assign(this.options, Interactions.options, options);
 
-		this.scope = scope;
+		// Bind elements in this namespace
+		this.namespace = namespace;
+		// Set of all bound elements
 		this.elements = new Set();
 		
-		// Bind elements on startup
+		// Bind elements on initialization
 		if (this.options.autoBind) {
 			this.bindAll();
 		}
 	}
 
-	// Bind interactive components to an element
+	// Bind a Vegvisir interactive HTMLElement
 	bind(element) {
-		let action = element.getAttribute("vv-call");
+		const methodName = element.getAttribute("vv-call") ?? "void";
 
-		// Call method with value of "vv-do" attribute if defiend
-		if (action !== null) {
-			// Action requested but method name not provided, attempt to resolve from element type
-			if (action.length < 1 && typeof element === HTMLAnchorElement) {
-				action = "nav";
-			}
-
-			// Call method when element is interacted with
-			element.addEventListener(this.options.eventType, (event) => {
-				event.stopPropagation();
-				this.methods[action](event);
-			});
-		}
+		// Call method when element is interacted with
+		element.addEventListener(this.options.eventType, (event) => {
+			event.preventDefault();
+			event.stopPropagation();
+			
+			this.methods[methodName](event);
+		});
 
 		this.elements.add(element);
 	}
 
-	// Find and bind all Vegvisir interactive elements in scope
+	// Find and bind all Vegvisir interactive elements by namespace
 	bindAll() {
-		const elements = [...document.querySelectorAll(`[vv="${this.scope}"]`)];
+		const elements = [...document.querySelectorAll(`[vv="${this.namespace}"]`)];
 		elements.forEach(element => this.bind(element));
 	}
 }
