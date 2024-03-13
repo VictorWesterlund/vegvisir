@@ -96,8 +96,8 @@ globalThis.vv.Navigation = class Navigation {
 				tag.setAttribute(attribute, script.getAttribute(attribute));
 			}
 			
-			// Scope imported JS by default unless the data-noscope is explicitly defined
-			tag.innerHTML = !("noscope" in script.dataset) ? `{${script.innerText}}` : script.innerHTML;
+			// Scope imported JS by default unless it's an ESM
+			tag.innerHTML = script.getAttribute("type") !== "module" ? `{${script.innerText}}` : script.innerHTML;
 
 			script.remove();
 			target.appendChild(tag);
@@ -222,8 +222,14 @@ globalThis.vv.Navigation = class Navigation {
 				this.setTargetHtml(target, body);
 				this.dispatchEvent(Navigation.events.LOADED, target);
 
+				// Set loaded page pathname on target element
+				target.setAttribute("vv-page", url.pathname);
+
 				// Navigation target is the main element
 				if (target === this.main) {
+					// Set loaded page pathanme on document body if main was navigated
+					document.body.setAttribute("vv-page", url.pathname);
+
 					// Add final URL to history and carry anchor from requested URL if provided
 					this.historyPush(finalUrl + url.hash);
 				}

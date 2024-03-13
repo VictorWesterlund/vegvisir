@@ -3,7 +3,7 @@
 	/*
 		This file generates a minified bundle of all resources loaded with Path::init()
 		These are JavaScript files that are required to run the Vegvisir front-end and
-		and is loaded once.
+		are required for Vegvisir SPA functions.
 	*/
 
 	use \Vegvisir\ENV;

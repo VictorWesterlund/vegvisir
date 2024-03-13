@@ -16,7 +16,7 @@ class Navigate {
 
 		// Append request method if carryRequestMethod flag is set
 		if (this.options.carryRequestMethod) {
-			this.options.method = request.vars.initial_method;
+			this.fetchOptions.method = request.vars.initial_method;
 
 			// Append JSON request body if request is not GET or HEAD
 			if (!["GET", "HEAD"].includes(request.vars.initial_method.toUpperCase())) {
