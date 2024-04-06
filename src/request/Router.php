@@ -2,9 +2,9 @@
 
 	namespace Vegvisir\Request;
 
-	use \VV as Page;
-	use \Vegvisir\ENV;
-	use \Vegvisir\Path;
+	use VV;
+	use Vegvisir\ENV;
+	use Vegvisir\Path;
 
 	require_once Path::vegvisir("src/request/VV.php");
 
@@ -37,14 +37,14 @@
 
 				// Ignore requests to /favicon.ico which sometimes gets sent automatically
 				// by browsers when a an icon meta tag is not specified. We don't want to prepare
-				// a whole page instance for this.
+				// a whole VV instance for this.
 				case "/favicon.ico": 
 					// Return no content response
-					return Page::error(204);
+					return VV::error(204);
 
-				// Pass request to Page() initializer
+				// Pass request to VV() initializer
 				default:
-					return new Page($this->get_requested_path());
+					return new VV($this->get_requested_path());
 			}
 		}
 
@@ -57,7 +57,7 @@
 		}
 
 		private function get_requested_path(): string {
-			// Requests to root of user content path should be rewritten to configured index page
+			// Requests to root of user content path should be rewritten to configured index VV
 			$path = $this->path !== "/" ? $this->path : ENV::get(ENV::INDEX);
 
 			// Strip leading slash

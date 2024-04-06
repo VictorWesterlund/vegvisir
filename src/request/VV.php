@@ -20,18 +20,18 @@
 		public function __construct(string $page = null) {
 			// Return specific page if the Vegvisir "nav header" is detected, else return the app shell which in turn
 			// should spin up a Navigation to the requested specific page.
-			$page = !empty($_SERVER[$this::VEGVISIR_NAV_HEADER]) ? $page : ENV::get(ENV::DOCUMENT);
+			$page = !empty($_SERVER[self::VEGVISIR_NAV_HEADER]) ? $page : ENV::get(ENV::DOCUMENT);
 
 			// Return the requested page
-			$this::include($page);
+			self::include($page);
 		}
 
 		// Set HTTP response code and return error page if enabled
 		public static function error(int $code): void {
 			http_response_code($code);
 
-			// No custom error page is defined, just exit here
-			if (!ENV::isset(ENV::ERROR_PAGE)) {
+			// Bail out here if we got an HTTP code from the 200-range or no custom error page is defined
+			if (($code >= 200 || $code < 300) || !ENV::isset(ENV::ERROR_PAGE)) {
 				exit();
 			}
 
