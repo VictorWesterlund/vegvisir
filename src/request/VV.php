@@ -31,7 +31,7 @@
 			http_response_code($code);
 
 			// Bail out here if we got an HTTP code from the 200-range or no custom error page is defined
-			if (($code >= 200 || $code < 300) || !ENV::isset(ENV::ERROR_PAGE)) {
+			if (($code >= 200 && $code < 300) || !ENV::isset(ENV::ERROR_PAGE)) {
 				exit();
 			}
 
