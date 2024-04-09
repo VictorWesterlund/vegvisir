@@ -161,6 +161,7 @@ globalThis.vv.Navigation = class Navigation {
 			case "_top":
 			default:
 				target = this.main;
+				// Link href has been explicitly defined and that includes search parameters
 				this.options.carrySearchParams = true;
 				break;
 		}
