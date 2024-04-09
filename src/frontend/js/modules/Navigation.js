@@ -161,6 +161,7 @@ globalThis.vv.Navigation = class Navigation {
 			case "_top":
 			default:
 				target = this.main;
+				this.options.carrySearchParams = true;
 				break;
 		}
 
