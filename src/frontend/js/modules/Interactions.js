@@ -1,5 +1,7 @@
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&dn=gpl-3.0.txt GPL-v3-or-Later
+
 // Event binder and handler for interactive elements
-class Interactions {
+globalThis.vv.Interactions = class Interactions {
 	// Default options object used when constructing this class
 	static options = {
 		autoBind: true,
@@ -7,14 +9,11 @@ class Interactions {
 		eventType: "click"
 	}
 
-	constructor(scope, methods = {}, options = {}) {
+	constructor(namespace, methods = {}, options = {}) {
 		// Default "built-in" interactions
 		this.methods = {
-			nav: (event) => {
-				event.preventDefault();
-				new Navigation(event);
-			},
-			void: () => {}
+			void: ()     => {},
+			navigate: (event) => new vv.Navigation(event)
 		}
 		
 		// Merge incoming- and default interactions
@@ -24,49 +23,37 @@ class Interactions {
 		this.options = {};
 		this.options = Object.assign(this.options, Interactions.options, options);
 
-		this.scope = scope;
+		// Bind elements in this namespace
+		this.namespace = namespace;
+		// Set of all bound elements
 		this.elements = new Set();
 		
-		// Bind elements on startup
+		// Bind elements on initialization
 		if (this.options.autoBind) {
 			this.bindAll();
 		}
 	}
 
-	// Return default method name by element type
-	defaultActionFromType(element) {
-		switch (typeof element) {
-			case HTMLAnchorElement:
-				return "nav";
-
-			default:
-				console.warn("Vegvisir:Interactions: Undefined interaction", element);
-				return "void";
-		}
-	}
-
-	// Bind interactive components to an element
+	// Bind a Vegvisir interactive HTMLElement
 	bind(element) {
-		// Call method when element is interacted with
-		if ("action" in element.dataset) {
-			// Action requested but method name not provided, attempt to resolve from element type
-			if (element.dataset.action.length < 1) {
-				element.dataset.action = this.defaultActionFromType(element);
-			}
+		const methodName = element.getAttribute("vv-call") ?? "void";
 
-			// Call method when element is interacted with
-			element.addEventListener(this.options.eventType, event => {
-				event.stopPropagation(); // Don't bubble interaction to parent elements
-				this.methods[element.dataset.action](event);
-			});
-		}
+		// Call method when element is interacted with
+		element.addEventListener(this.options.eventType, (event) => {
+			event.preventDefault();
+			event.stopPropagation();
+			
+			this.methods[methodName](event);
+		});
 
 		this.elements.add(element);
 	}
 
-	// Find and bind all interactive elements on page
+	// Find and bind all Vegvisir interactive elements by namespace
 	bindAll() {
-		const elements = [...document.querySelectorAll(`[data-trigger="${this.scope}"]`)];
+		const elements = [...document.querySelectorAll(`[vv="${this.namespace}"]`)];
 		elements.forEach(element => this.bind(element));
 	}
 }
+
+// @license-end

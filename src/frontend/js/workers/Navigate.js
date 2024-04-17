@@ -1,4 +1,6 @@
-class NavigationWorker {
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&dn=gpl-3.0.txt GPL-v3-or-Later
+
+class Navigate {
 	constructor(request) {
 		// Parse URL form string into URL object
 		this.url = new URL(request.url);
@@ -14,7 +16,7 @@ class NavigationWorker {
 
 		// Append request method if carryRequestMethod flag is set
 		if (this.options.carryRequestMethod) {
-			this.options.method = request.vars.initial_method;
+			this.fetchOptions.method = request.vars.initial_method;
 
 			// Append JSON request body if request is not GET or HEAD
 			if (!["GET", "HEAD"].includes(request.vars.initial_method.toUpperCase())) {
@@ -51,4 +53,6 @@ class NavigationWorker {
 	}
 }
 
-globalThis.addEventListener("message", event => new NavigationWorker(event.data));
+globalThis.addEventListener("message", event => new Navigate(event.data));
+
+// @license-end

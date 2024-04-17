@@ -2,57 +2,58 @@
 
 	namespace Vegvisir;
 
-	/*
-		# Vegvisir environment abstractions
-		This class contains abstractions for Vegvisir environment variables
-	*/
-	class ENV {
-        // Vegvisir environment variables are placed in $_ENV as an assoc array with this as the array key.
-        // Example: $_ENV[self::NS][<vegvisir_env_var>]
-        public const NS = "_VEGVISIR";
+	const PATH_COMPOSER = "vendor/autoload.php";
+	const PATH_ENV = ".env.ini";
 
-		// Name of the .ini file containing environment variables to be loaded (internal and userspace)
-		private const INI = ".env.ini";
+	use \Vegvisir\ENV;
+	use \Vegvisir\Path;
 
-		// Path to the composer autoload file (internal and userspace)
-		private const COMPOSER_AUTOLOAD = "vendor/autoload.php";
+	// Backed enum for all variables available in ENV::ENV_INI
+	enum ENV: string {
+		protected const NAMESPACE = "_vv";
+		protected const ENV_INI = ".env.ini";
+		protected const COMPOSER = "vendor/autoload.php";
 
-        // Returns true if Reflect environment variable is present and not empty in 
-        public static function isset(string $key): bool {
-            return in_array($key, array_keys($_ENV[self::NS])) && !empty($_ENV[self::NS][$key]);
-        }
+		case SITE         = "site_path";
+		case MAIN         = "selector_main_element";
+		case DOCUMENT     = "page_document";
+		case INDEX        = "page_index";
+		case ERROR_PAGE   = "error_page_path";
+
+		// Returns true if Reflect environment variable is present and not empty in 
+		public static function isset(ENV $key): bool {
+			return in_array($key->value, array_keys($_ENV[self::NAMESPACE])) && !empty($_ENV[self::NAMESPACE][$key->value]);
+		}
 
 		// Get environment variable by key
-		public static function get(string $key): mixed {
-			return self::isset($key) ? $_ENV[self::NS][$key] : null;
+		public static function get(ENV $key): mixed {
+			return self::isset($key) ? $_ENV[self::NAMESPACE][$key->value] : null;
 		}
 
 		// Set environment variable key, value pair
-		public static function set(string $key, mixed $value = null) {
-			$_ENV[self::NS][$key] = $value;
+		public static function set(ENV $key, mixed $value = null) {
+			$_ENV[self::NAMESPACE][$key->value] = $value;
 		}
-
-		/* ---- */
 
 		// Load environment variables and dependancies
 		public static function init() {
 			// Put environment variables from Vegvisir .ini into namespaced superglobal
-			$_ENV[self::NS] = parse_ini_file(Path::vegvisir(self::INI), true);
+			$_ENV[self::NAMESPACE] = parse_ini_file(Path::vegvisir(self::ENV_INI), true);
 
 			// Load Composer dependencies
-			require_once Path::vegvisir(self::COMPOSER_AUTOLOAD);
+			require_once Path::vegvisir(self::COMPOSER);
 
 			// Merge environment variables from user site into superglobal
-			if (file_exists(Path::root(self::INI))) {
-				$_ENV = array_merge($_ENV, parse_ini_file(Path::root(self::INI), true));
+			if (file_exists(Path::root(self::ENV_INI))) {
+				$_ENV = array_merge($_ENV, parse_ini_file(Path::root(self::ENV_INI), true));
 			}
 
 			// Load composer dependencies from userspace if exists
-			if (file_exists(Path::root(self::COMPOSER_AUTOLOAD))) {
-				require_once Path::root(self::COMPOSER_AUTOLOAD);
+			if (file_exists(Path::root(self::COMPOSER))) {
+				require_once Path::root(self::COMPOSER);
 			}
 		}
-    }
+	}
 
 	// Global paths
 	class Path {
@@ -63,12 +64,7 @@
 
 		// Get root of user site folder
 		public static function root(string $crumbs = ""): string {
-			return ENV::get("site_path") . "/" . $crumbs;
-		}
-
-		// List the files and folders in directory (without the dots on Linux)
-		public static function ls(string $path): array|bool {
-			return array_diff(scandir($path), ["..", "."]);
+			return ENV::get(ENV::SITE) . "/" . $crumbs;
 		}
 	}
 

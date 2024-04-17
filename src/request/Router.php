@@ -2,15 +2,15 @@
 
 	namespace Vegvisir\Request;
 
-	use \Page;
-	use \Vegvisir\ENV;
-	use \Vegvisir\Path;
+	use VV;
+	use Vegvisir\ENV;
+	use Vegvisir\Path;
 
-	require_once Path::vegvisir("src/request/Page.php");
+	require_once Path::vegvisir("src/request/VV.php");
 
 	enum StaticPathRegex: string {
-		case ASSET  = "/^\/assets\/*/";
-		case WORKER = "/^\/_vegvisir_wrkr\/*/"; // "Vegvisir worker"
+		case ASSETS  = "/^\/assets\/*/";
+		case WORKER = "/^\/_vv\/*/"; // "Vegvisir worker"
 	}
 
 	class Router {
@@ -28,23 +28,23 @@
 			// Perform request routing
 			switch ($this->path) {
 				// Get static asset from user content
-				case (preg_match(StaticPathRegex::ASSET->value, $this->path) ? true : false):
+				case ((bool) preg_match(StaticPathRegex::ASSETS->value, $this->path)):
 					return $this->asset();
 				
 				// Return script to be run in a JS Worker
-				case (preg_match(StaticPathRegex::WORKER->value, $this->path) ? true : false):
+				case ((bool) preg_match(StaticPathRegex::WORKER->value, $this->path)):
 					return $this->worker();
 
 				// Ignore requests to /favicon.ico which sometimes gets sent automatically
 				// by browsers when a an icon meta tag is not specified. We don't want to prepare
-				// a whole page instance for this.
+				// a whole VV instance for this.
 				case "/favicon.ico": 
 					// Return no content response
-					return Page::error(204);
+					return VV::error(204);
 
-				// Pass request to Page() initializer
+				// Pass request to VV() initializer
 				default:
-					return new Page($this->get_requested_path());
+					return new VV($this->get_requested_path());
 			}
 		}
 
@@ -57,8 +57,8 @@
 		}
 
 		private function get_requested_path(): string {
-			// Requests to root of user content path should be rewritten to configured index page
-			$path = $this->path !== "/" ? $this->path : ENV::get("page_index");
+			// Requests to root of user content path should be rewritten to configured index VV
+			$path = $this->path !== "/" ? $this->path : ENV::get(ENV::INDEX);
 
 			// Strip leading slash
 			if (strpos($this->path, "/") === 0) {
