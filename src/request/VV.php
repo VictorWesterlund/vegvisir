@@ -11,6 +11,8 @@
 
 	// Library used to minify JS and CSS
 	use MatthiasMullie\Minify;
+	// Library for storing superglobal states
+	use victorwesterlund\GlobalSnapshot;
 
 	class VV {
 		// This class will look for this header to determine if we should send the env "page_document" or
@@ -108,7 +110,9 @@
 		}
 
 		// Include external PHP file from user site into the current document
-		public static function include(string $name) {
+		public static function include(string $name, array $get = null, array $post = null) {
+			$snapshot = new GlobalSnapshot();
+
 			// Rewrite empty path and "/" to page_index
 			$name = !empty($name) && $name !== "/" ? $name : ENV::get(ENV::INDEX);
 
@@ -119,8 +123,29 @@
 				return self::error(404);
 			}
 
+			// Proxy superglobals if defined
+			if ($get || $post) {
+				// Create a superglobal restore point
+				$snapshot->capture();
+
+				// Proxy GET superglobal
+				if ($get) {
+					$_GET = $get;
+				}
+
+				// Proxy POST superglobal
+				if ($post) {
+					$_POST = $post;
+				}
+			}
+
 			// Import and run PHP file
 			include $file;
+
+			// Restore captured superglobals
+			if ($snapshot->captured) {
+				$snapshot->restore();
+			}
 		}
 
 		public static function init(): void {
