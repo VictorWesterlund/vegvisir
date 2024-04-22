@@ -12,6 +12,9 @@
 	// Library used to minify JS and CSS
 	use MatthiasMullie\Minify;
 
+	// -- Expose these helper scripts to Vegvisir pages --
+	require_once Path::vegvisir("src/request/Proxy.php");
+
 	class VV {
 		// This class will look for this header to determine if we should send the env "page_document" or
 		// the contents of a specific page.
