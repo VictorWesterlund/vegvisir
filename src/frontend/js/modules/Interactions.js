@@ -1,5 +1,3 @@
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&dn=gpl-3.0.txt GPL-v3-or-Later
-
 // Event binder and handler for interactive elements
 globalThis.vv.Interactions = class Interactions {
 	// Default options object used when constructing this class
@@ -55,5 +53,3 @@ globalThis.vv.Interactions = class Interactions {
 		elements.forEach(element => this.bind(element));
 	}
 }
-
-// @license-end
