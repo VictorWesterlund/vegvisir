@@ -5,8 +5,8 @@
 	const PATH_COMPOSER = "vendor/autoload.php";
 	const PATH_ENV = ".env.ini";
 
-	use \Vegvisir\ENV;
-	use \Vegvisir\Path;
+	use Vegvisir\ENV;
+	use Vegvisir\Path;
 
 	// Backed enum for all variables available in ENV::ENV_INI
 	enum ENV: string {

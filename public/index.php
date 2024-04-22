@@ -1,7 +1,7 @@
 <?php
 
-	use \Vegvisir\Path;
-	use \Vegvisir\Request\Router;
+	use Vegvisir\Path;
+	use Vegvisir\Request\Router;
 
 	require_once "../src/Init.php";
 
