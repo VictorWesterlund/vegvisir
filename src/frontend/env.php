@@ -4,7 +4,7 @@
 
 	namespace Vegvisir\Frontend;
 
-	use \Vegvisir\ENV;
+	use Vegvisir\ENV;
 
 	class ExportVariables {
 		// Sequential array of JSON formatted strings with property name and values

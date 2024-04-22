@@ -6,9 +6,9 @@
 		are required for Vegvisir SPA functions.
 	*/
 
-	use \Vegvisir\ENV;
-	use \Vegvisir\Path;
-	use \Vegvisir\Frontend\ExportVariables;
+	use Vegvisir\ENV;
+	use Vegvisir\Path;
+	use Vegvisir\Frontend\ExportVariables;
 
 	// Include export of select Vegvisir environment variables
 	include Path::vegvisir("src/frontend/env.php");

@@ -6,8 +6,8 @@
 		with no need to declare "use" on every page.
 	*/
 
-	use \Vegvisir\ENV;
-	use \Vegvisir\Path;
+	use Vegvisir\ENV;
+	use Vegvisir\Path;
 
 	// Library used to minify JS and CSS
 	use MatthiasMullie\Minify;
