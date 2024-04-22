@@ -111,7 +111,7 @@
 		}
 
 		// Include external PHP file from user site into the current document
-		public static function include(string $name, array $get = null, array $post = null) {
+		public static function include(string $name) {
 			// Rewrite empty path and "/" to page_index
 			$name = !empty($name) && $name !== "/" ? $name : ENV::get(ENV::INDEX);
 
