@@ -1,5 +1,3 @@
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&dn=gpl-3.0.txt GPL-v3-or-Later
-
 // Multi-threaded SPA navigation handler
 globalThis.vv.Navigation = class Navigation {
 	static WORKER_PATHNAME = "/_vv/Navigate.js";
@@ -241,5 +239,3 @@ globalThis.vv.Navigation = class Navigation {
 		}, { singal: this.abortController.signal });
 	}
 }
-
-// @license-end
