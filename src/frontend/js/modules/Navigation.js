@@ -223,12 +223,12 @@ globalThis.vv.Navigation = class Navigation {
 				// Get navigation details from Worker
 				const [body, status, finalUrl] = event.data;
 
+				// Unset loading attribute on target
+				target.setAttribute("vv-loading", false);
+
 				// Update DOM and resolve this and outer Promise
 				this.setTargetHtml(target, body);
 				this.dispatchEvent(Navigation.events.LOADED, target);
-
-				// Unset loading attribute on target
-				target.setAttribute("vv-loading", false);
 
 				// Navigation target is the main element
 				if (target === this.main) {
