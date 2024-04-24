@@ -207,8 +207,6 @@ globalThis.vv.Navigation = class Navigation {
 
 		// Set loading attribute on target
 		target.setAttribute("vv-loading", true);
-		// Set upcoming page pathname on target element
-		target.setAttribute("vv-page", url.pathname);
 
 		// Fetch page and pass options and exposed environment variables
 		this.worker.postMessage({
@@ -230,9 +228,12 @@ globalThis.vv.Navigation = class Navigation {
 				this.setTargetHtml(target, body);
 				this.dispatchEvent(Navigation.events.LOADED, target);
 
+				// Set loaded page pathname on target element
+				target.setAttribute("vv-page", url.pathname);
+
 				// Navigation target is the main element
 				if (target === this.main) {
-					// Set loaded page pathanme on document body if main was navigated
+					// Set loaded page pathname on document body if main was navigated
 					document.body.setAttribute("vv-page", url.pathname);
 
 					// Add final URL to history and carry anchor from requested URL if provided
