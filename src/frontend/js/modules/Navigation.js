@@ -205,6 +205,11 @@ globalThis.vv.Navigation = class Navigation {
 			target = document.querySelector(target);
 		}
 
+		// Set loading attribute on target
+		target.setAttribute("vv-loading", true);
+		// Set upcoming page pathname on target element
+		target.setAttribute("vv-page", url.pathname);
+
 		// Fetch page and pass options and exposed environment variables
 		this.worker.postMessage({
 			options: this.options,
@@ -218,12 +223,12 @@ globalThis.vv.Navigation = class Navigation {
 				// Get navigation details from Worker
 				const [body, status, finalUrl] = event.data;
 
+				// Unset loading attribute on target
+				target.setAttribute("vv-loading", false);
+
 				// Update DOM and resolve this and outer Promise
 				this.setTargetHtml(target, body);
 				this.dispatchEvent(Navigation.events.LOADED, target);
-
-				// Set loaded page pathname on target element
-				target.setAttribute("vv-page", url.pathname);
 
 				// Navigation target is the main element
 				if (target === this.main) {
