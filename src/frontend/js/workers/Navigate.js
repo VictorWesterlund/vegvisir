@@ -39,16 +39,8 @@ class Navigate {
 
 	// Request page from back-end
 	async getPage() {
-		// Fetch URL by pathname and carry search parameters
-		let url = this.url.pathname;
-
-		// Carry search parameters if flag is set
-		if (this.options.carrySearchParams) {
-			url = url + this.url.search;
-		}
-		
-		// Fetch page from URL with options
-		await this.send(await fetch(new Request(url, this.fetchOptions)));
+		// Fetch page by pathname and search params from URL with options
+		await this.send(await fetch(new Request(this.url.pathname + this.url.search, this.fetchOptions)));
 		globalThis.close();
 	}
 }
