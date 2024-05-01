@@ -40,7 +40,7 @@ class Navigate {
 	// Request page from back-end
 	async getPage() {
 		// Fetch page by pathname and search params from URL with options
-		await this.send(await fetch(new Request(this.url.pathname + this.url.search, this.fetchOptions)));
+		await this.send(await fetch(new Request(this.url, this.fetchOptions)));
 		globalThis.close();
 	}
 }
