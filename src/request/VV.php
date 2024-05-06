@@ -34,6 +34,8 @@
 			return strpos($input, $extension) ? $input : $input . $extension;
 		}
 
+		// -- Methods callable from any Vegvisir page --
+
 		// Set HTTP response code and return error page if enabled
 		public static function error(int $code): void {
 			http_response_code($code);
@@ -66,7 +68,17 @@
 		public static function media(string $file, bool $relative = true): string {
 			$file = $relative ? Path::root("assets/media/" . $file) : $file;
 			
-			return is_file($file) ? file_get_contents($file) : "";
+			// Return empty string if media file doesn't exist
+			if (!is_file($file)) {
+				return "";
+			}
+
+			// Resolve MIME-type and charset for media
+			[$mime, $charset] = explode("; ", finfo_file(finfo_open(FILEINFO_MIME), $file), 2);
+
+			$data = file_get_contents($file);			
+			// Return binary files as base64-encoded strings
+			return $charset !== "charset=binary" ? $data : "data:{$mime};base64," . base64_encode($data);
 		}
 
 		// Include and evaulate a PHP file relative from userspace root
