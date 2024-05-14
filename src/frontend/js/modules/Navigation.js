@@ -20,7 +20,7 @@ globalThis.vv.Navigation = class Navigation {
 		carryRequestMethod: false
 	}
 
-	constructor(source, options = {}) {
+	constructor(source = window.location, options = {}) {
 		// Spin up dedicated worker
 		this.worker = new Worker(Navigation.WORKER_PATHNAME);
 
