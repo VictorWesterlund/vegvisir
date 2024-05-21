@@ -45,6 +45,37 @@ Vegvisir does not come bundled with page controllers, CSS safety nets, database 
 
 *Vegvisir is not this*
 
+## More examples
+
+### Navigating between pages
+```
+HTTP GET https://example.com/page-one
+```
+```php
+# File: /pages/page-one.php
+<a vv="page-one-namespace" vv-call="gotoPageTwo" href="/page-two">To page two</a>
+<script><?= VV::js("pages/page-one") ?></script>
+```
+```js
+// File: /assets/js/pages/page-one.js
+new vv.Interactions("page-one-namespace", {
+  gotoPageTwo: (event) => new vv.Navigation(event.target.href).navigate();
+});
+```
+
+> [!TIP]
+> Adding `vv-call="navigate"` to an anchor tag will take care of top navigations without the need to define a method for its namespace.
+> 
+> `<a href="/" vv="some-namespace" vv-call="navigate">Take care of navigation to /</a>`
+
+### Navigate an element
+
+Passing an `HTMLElement` as an argument to `vv.Navigation.navigate()` will replace inner DOM of that element with the DOM of the requested page.
+
+```js
+new vv.Navigation("/some-page").navigate(document.querySelector("some-element")); // Replaces the inner DOM of <some-element> with the DOM of /some-page
+```
+
 # Support
 
 <table>
