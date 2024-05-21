@@ -10,7 +10,7 @@
 - **Page-specific assets**: CSS and JavaScript is minified and injected along with loaded pages.
 - **Native PHP templating**: Pure PHP templating with PHP's ["alternative syntax for control structures"](https://www.php.net/manual/en/control-structures.alternative-syntax.php)
 - **Top-level soft-navigation**: User navigation between pages will not update your webapp/website skeleton.
-- **Page asset injection**: User navigation between pages will not update your webapp/website skeleton.
+- **Page asset injection**: Import CSS and JS asset files as minified inline styles and scripts.
 - **Soft-navigation of any element**: Load pages/modules into a specific HTMLElement with [`targetElement` position syntax](https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentElement#position).
 
 This is an example of what the source of a simple web page can look like
