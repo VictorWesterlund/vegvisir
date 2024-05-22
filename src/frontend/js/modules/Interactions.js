@@ -40,6 +40,11 @@ globalThis.vv.Interactions = class Interactions {
 		element.addEventListener(this.options.eventType, (event) => {
 			event.preventDefault();
 			event.stopPropagation();
+
+			// Bail out if method does not exist in namespace
+			if (!(methodName in this.methods)) {
+				return console.error(`Vegvisir:Interactions: Method '${methodName}' not found`, this.methods);
+			}
 			
 			this.methods[methodName](event);
 		});
