@@ -20,12 +20,11 @@ globalThis.vv.Navigation = class Navigation {
 		carryRequestMethod: false
 	}
 
-	constructor(source = window.location, options = {}) {
-		// Spin up dedicated worker
-		this.worker = new Worker(Navigation.WORKER_PATHNAME);
+	worker = undefined;
+	options = {};
 
+	constructor(source = window.location, options = {}) {
 		// Merge default options with overrides
-		this.options = {};
 		this.options = Object.assign(this.options, Navigation.options, options);
 
 		// $this.navigate() will abort from the signal of this object.
@@ -51,6 +50,11 @@ globalThis.vv.Navigation = class Navigation {
 		}
 
 		this.dispatchEvent(Navigation.events.STARTED);
+	}
+
+	// Spin up dedicated worker
+	spawnWorker() {
+		this.worker = new Worker(Navigation.WORKER_PATHNAME);
 	}
 
 	// Push new history session entry onto the stack
@@ -194,6 +198,8 @@ globalThis.vv.Navigation = class Navigation {
 
 	// Perform SPA navigation by fetching new page and modifing DOM
 	async navigate(target = null) {
+		this.spawnWorker();
+
 		target = target ?? this.main;
 		// We need a local reference to the url object so the response listener can access it later
 		const url = this.url;
