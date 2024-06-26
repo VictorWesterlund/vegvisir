@@ -149,7 +149,7 @@ globalThis.vv.Navigation = class Navigation {
 			// Replace closest Vegvisir Navigation context
 			default:
 			case "_parent":
-				target = event.target.closest("[vv-page]:not(body)");
+				target = event.target.closest("[vv-page]");
 				break;
 
 			// Has no effect on soft-navigations, do browser default
