@@ -130,40 +130,37 @@ globalThis.vv.Navigation = class Navigation {
 
 	// Extract URL and target from received event
 	eventHandler(event) {
-		// Is activation type event
 		const element = event.target.closest("a");
-
 		if (!element) {
 			console.error("Vegvisir:Navigation: No anchor tag found between target and root", event.target);
 			return;
 		}
 
-		let target = element.getAttribute("target");
-
 		this.url = this.urlFromString(element.href);
 		
-		// Use the target attribute of the element to determine where to inject loaded content
+		// Get target attribute of the element. We will use this to determine which element to navigate
+		let target = element.getAttribute("target");
 		switch (target) {
-			// Replace inner DOM of the the clicked element
+			// Replace event target HTMLElement with loaded DOM
 			case "_self":
 				target = event.target;
 				break;
 
-			// Replace inner DOM of target's closest parent element (will remove clicked element from DOM)
+			// Replace closest Vegvisir Navigation context
+			default:
 			case "_parent":
-				target = element.parentElement;
+				target = event.target.closest("[vv-page]");
 				break;
 
-			// Page is to be opened in a new tab. Do normal browser behaviour
+			// Has no effect on soft-navigations, do browser default
 			case "_blank":
 				console.warn("Vegvisir:Navigation: target='_blank' from Vegvisir is not supported");
 				return window.open(this.url);
 
-			// Perform a normal navigation of the main element
+			// Perform a top-level navigation
 			case "_top":
-			default:
 				target = this.main;
-				// Link href has been explicitly defined and that includes search parameters
+				// Include search parameters from anchor tag as they have been explicitly defined
 				this.options.carrySearchParams = true;
 				break;
 		}
