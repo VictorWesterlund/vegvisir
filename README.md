@@ -2,7 +2,7 @@
 <img src="https://github.com/VictorWesterlund/vegvisir/assets/35688133/4c33189e-eb70-4dab-82ae-8f0f404e1a0a"
 </p>
 <h1 align="center">Vegvisir</h1>
-<p align="center">Reflect is a web framework written in- and for PHP and JavaScript. The framework handles navigation and interactions, nothing more.</p>
+<p align="center">Reflect is a web framework written in- and for PHP and JavaScript developers. The framework does soft-page navigation, and optional event handling for interactions in JavaScript - nothing more.</p>
 
 <h2 align="center">Key Features</h2>
 
@@ -43,7 +43,7 @@ Vegvisir does not come bundled with page controllers, CSS safety nets, database 
 
 ![meme](https://user-images.githubusercontent.com/35688133/204326222-236a71be-5ea3-4653-8caa-6f6cfcd0d0d6.png)
 
-*Vegvisir is not this*
+*Vegvisir is not this. If a bigger ball is coming your way; it's ~~probably~~ better to use a more competent framework like Laravel!*
 
 ## More examples
 
